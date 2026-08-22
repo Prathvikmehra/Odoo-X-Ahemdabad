@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "placeholder_secret_key"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    CORS_ORIGINS: Annotated[Union[List[str], str], NoDecode] = ["http://localhost:5173"]
+    CORS_ORIGINS: Annotated[Union[List[str], str], NoDecode] = [
+        f"http://localhost:{port}" for port in range(5170, 5185)
+    ] + [
+        f"http://127.0.0.1:{port}" for port in range(5170, 5185)
+    ]
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
@@ -23,6 +27,7 @@ class Settings(BaseSettings):
         elif isinstance(v, list):
             return v
         return [v]
+
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
