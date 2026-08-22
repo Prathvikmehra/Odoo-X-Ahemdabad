@@ -1,3 +1,33 @@
 import axios from 'axios';
 
-export const api = axios.create({ baseURL: import.meta.env.VITE_API_URL });
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+});
+
+// Request Interceptor: Attach Bearer token if present
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response Interceptor: Handle 401 Unauthorized globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      // Prevent infinite loops if already on auth pages
+      if (!['/login', '/signup'].includes(window.location.pathname)) {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
