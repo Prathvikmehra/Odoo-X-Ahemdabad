@@ -4,4 +4,6 @@ Base = declarative_base()
 
 from app.models.user import User
 from app.models.trip import Trip
-# TODO: Import TripStop, Activity, Expense models here when they are added
+from app.models.trip_stop import TripStop
+from app.models.activity import Activity
+from app.models.expense import Expense

@@ -21,3 +21,5 @@ class Trip(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="trips")
+    stops = relationship("TripStop", back_populates="trip", cascade="all, delete-orphan")
+    expenses = relationship("Expense", back_populates="trip", cascade="all, delete-orphan")
