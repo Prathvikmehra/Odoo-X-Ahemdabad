@@ -1,0 +1,1 @@
+export default function TripDetails() { return <div>TripDetails Page</div>; }
