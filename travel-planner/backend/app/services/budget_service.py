@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from typing import Dict, Any
 from app.models.expense import Expense
-from app.schemas.expense import BudgetSummaryOut
 
 
-def calculate_trip_budget(db: Session, trip_id: int) -> BudgetSummaryOut:
-    results = (
+def calculate_trip_budget(db: Session, trip_id: int) -> Dict[str, Any]:
+    rows = (
         db.query(Expense.category, func.sum(Expense.amount))
         .filter(Expense.trip_id == trip_id)
         .group_by(Expense.category)
@@ -14,12 +14,12 @@ def calculate_trip_budget(db: Session, trip_id: int) -> BudgetSummaryOut:
 
     categories = {}
     total = 0.0
-    for category, category_total in results:
-        amount = float(category_total) if category_total is not None else 0.0
-        categories[category] = round(amount, 2)
-        total += amount
+    for cat, amount in rows:
+        val = float(amount) if amount is not None else 0.0
+        categories[cat] = val
+        total += val
 
-    return BudgetSummaryOut(
-        total=round(total, 2),
-        categories=categories,
-    )
+    return {
+        "total": round(total, 2),
+        "categories": {k: round(v, 2) for k, v in categories.items()},
+    }

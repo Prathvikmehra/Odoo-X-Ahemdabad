@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from typing import List
 from sqlalchemy.orm import Session
+import secrets
 
 from app.database.connection import get_db
 from app.models.user import User
 from app.models.trip import Trip
+from app.models.expense import Expense
 from app.schemas.trip import TripCreate, TripUpdate, TripOut
+from app.schemas.expense import ExpenseCreate, ExpenseOut, BudgetSummaryOut
+from app.schemas.public import ShareTripOut
+from app.services.budget_service import calculate_trip_budget
 from app.core.dependencies import get_current_user
 
 router = APIRouter()
@@ -96,22 +101,6 @@ def delete_trip(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-from app.models.expense import Expense
-from app.schemas.expense import ExpenseCreate, ExpenseOut, BudgetSummaryOut
-from app.services.budget_service import calculate_trip_budget
-
-
-# Downstream feature routes (stubs preserved)
-@router.get("/{trip_id}/stops")
-def get_stops(trip_id: int):
-    return {"msg": "get_stops"}
-
-
-@router.post("/{trip_id}/stops")
-def create_stop(trip_id: int):
-    return {"msg": "create_stop"}
-
-
 @router.get("/{trip_id}/expenses", response_model=List[ExpenseOut], status_code=status.HTTP_200_OK)
 def get_expenses(
     trip_id: int,
@@ -170,10 +159,6 @@ def get_budget(
     return calculate_trip_budget(db, trip.id)
 
 
-import secrets
-from app.schemas.public import ShareTripOut
-
-
 @router.post("/{trip_id}/share", response_model=ShareTripOut, status_code=status.HTTP_200_OK)
 def share_trip(
     trip_id: int,
@@ -199,5 +184,3 @@ def share_trip(
         share_url=f"/public/trips/{trip.share_token}",
         is_public=trip.is_public,
     )
-
-

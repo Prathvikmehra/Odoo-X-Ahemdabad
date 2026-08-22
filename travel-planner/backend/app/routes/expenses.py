@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
-
 from app.database.connection import get_db
 from app.models.user import User
 from app.models.trip import Trip
@@ -31,4 +30,3 @@ def delete_expense(
     db.delete(expense)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-

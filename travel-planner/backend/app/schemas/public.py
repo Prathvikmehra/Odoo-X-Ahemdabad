@@ -1,7 +1,6 @@
-from pydantic import BaseModel, ConfigDict
-from datetime import date, datetime
+from pydantic import BaseModel, ConfigDict, field_serializer
 from typing import Optional, List
-from decimal import Decimal
+from datetime import date, datetime
 
 
 class ShareTripOut(BaseModel):
@@ -15,12 +14,16 @@ class PublicActivityOut(BaseModel):
     name: str
     type: str
     description: Optional[str] = None
-    cost: Optional[Decimal] = None
-    duration_hours: Optional[Decimal] = None
+    cost: float
+    duration_hours: Optional[float] = None
     start_time: Optional[str] = None
     image_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer("cost")
+    def serialize_cost(self, v, _info) -> float:
+        return float(v) if v is not None else 0.0
 
 
 class PublicStopOut(BaseModel):
@@ -43,7 +46,7 @@ class PublicTripOut(BaseModel):
     end_date: date
     cover_image: Optional[str] = None
     is_public: bool
-    share_token: Optional[str] = None
+    share_token: str
     stops: List[PublicStopOut] = []
     created_at: Optional[datetime] = None
 
