@@ -1,46 +1,4 @@
-import os
-# Override DATABASE_URL before any app imports so SQLAlchemy uses SQLite
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
-
-from app.main import app
-from app.database.base import Base
-from app.database.connection import get_db
-
-# Create a separate test engine with StaticPool to keep in-memory DB alive
-test_engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    Base.metadata.create_all(bind=test_engine)
-    yield
-    Base.metadata.drop_all(bind=test_engine)
-
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-app.dependency_overrides[get_db] = override_get_db
-client = TestClient(app)
-
-
-def test_signup_success():
+def test_signup_success(client):
     payload = {
         "name": "Test User",
         "email": "test@example.com",
@@ -56,7 +14,7 @@ def test_signup_success():
     assert "password" not in data
 
 
-def test_signup_duplicate_email():
+def test_signup_duplicate_email(client):
     payload = {
         "name": "User One",
         "email": "duplicate@example.com",
@@ -70,7 +28,7 @@ def test_signup_duplicate_email():
     assert res2.json()["detail"] == "Email already registered"
 
 
-def test_login_success():
+def test_login_success(client):
     client.post("/api/auth/signup", json={
         "name": "Login User",
         "email": "login@example.com",
@@ -87,7 +45,7 @@ def test_login_success():
     assert data["token_type"] == "bearer"
 
 
-def test_login_invalid_password():
+def test_login_invalid_password(client):
     client.post("/api/auth/signup", json={
         "name": "Login User",
         "email": "login_wrong@example.com",
@@ -102,7 +60,7 @@ def test_login_invalid_password():
     assert login_res.json()["detail"] == "Invalid email or password"
 
 
-def test_login_nonexistent_user():
+def test_login_nonexistent_user(client):
     login_res = client.post("/api/auth/login", json={
         "email": "doesnotexist@example.com",
         "password": "some_password"
@@ -111,7 +69,7 @@ def test_login_nonexistent_user():
     assert login_res.json()["detail"] == "Invalid email or password"
 
 
-def test_get_current_user_me_authenticated():
+def test_get_current_user_me_authenticated(client):
     client.post("/api/auth/signup", json={
         "name": "Me User",
         "email": "me@example.com",
@@ -132,7 +90,7 @@ def test_get_current_user_me_authenticated():
     assert "password_hash" not in user_data
 
 
-def test_get_current_user_me_unauthorized():
+def test_get_current_user_me_unauthorized(client):
     me_res = client.get("/api/auth/me")
     assert me_res.status_code == 401
 
