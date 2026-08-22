@@ -1,218 +1,389 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { api } from '../../services/api';
 import { tripService } from '../../services/tripService';
-
-const STOP_CATEGORIES = ['Hotel', 'Restaurant', 'Attraction', 'Transport', 'Activity', 'Other'];
+import { stopService } from '../../services/stopService';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  DollarSign,
+  Share2,
+  Edit3,
+  Sparkles,
+  ArrowRight,
+  Compass,
+  CheckCircle,
+  Plus
+} from 'lucide-react';
+import Eyebrow from '../../components/common/Eyebrow';
+import Modal from '../../components/common/Modal';
 
 export default function Itinerary() {
   const { tripId } = useParams();
   const [trip, setTrip] = useState(null);
   const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [activeDay, setActiveDay] = useState('all');
 
-  // New stop form state
-  const [stopName, setStopName] = useState('');
-  const [stopCategory, setStopCategory] = useState('Attraction');
-  const [stopDate, setStopDate] = useState('');
-  const [stopNotes, setStopNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
+  const [shareModal, setShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tripData = await tripService.getTrip(tripId);
-        setTrip(tripData);
-        // stops endpoint is a stub: returns {msg: "get_stops"}
-        // We'll store stops in local state only for this session (backend stub)
-        const res = await api.get(`/trips/${tripId}/stops`);
-        setStops(Array.isArray(res.data) ? res.data : []);
-      } catch (err) {
-        setError(err.response?.data?.detail || 'Failed to load itinerary');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    loadData();
   }, [tripId]);
 
-  const handleAddStop = async (e) => {
-    e.preventDefault();
-    setFormError('');
-    if (!stopName.trim()) { setFormError('Stop name is required'); return; }
-    setSubmitting(true);
+  const loadData = async () => {
     try {
-      // Backend stops is a stub — we optimistically add to local UI state
-      // When backend is implemented, replace with: await api.post(`/trips/${tripId}/stops`, {...})
-      const newStop = {
-        id: Date.now(),
-        name: stopName,
-        category: stopCategory,
-        date: stopDate,
-        notes: stopNotes,
-        _local: true, // flag as locally added
-      };
-      setStops((prev) => [...prev, newStop]);
-      setStopName('');
-      setStopCategory('Attraction');
-      setStopDate('');
-      setStopNotes('');
-      setShowForm(false);
+      setLoading(true);
+      const tripData = await tripService.getTripById(tripId);
+      setTrip(tripData);
+
+      const stopsData = await stopService.getStops(tripId);
+      setStops(Array.isArray(stopsData) ? stopsData : []);
     } catch (err) {
-      setFormError('Failed to add stop.');
+      console.error('Error loading itinerary:', err);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const handleRemoveStop = (id) => {
-    if (!window.confirm('Remove this stop?')) return;
-    setStops((prev) => prev.filter((s) => s.id !== id));
+  const handleShare = async () => {
+    try {
+      let token = trip.share_token;
+      if (!token || !trip.is_public) {
+        const res = await tripService.shareTrip(tripId);
+        token = res.share_token;
+      }
+      const fullUrl = `${window.location.origin}/shared/${token}`;
+      setShareUrl(fullUrl);
+      setShareModal(true);
+    } catch (err) {
+      console.error('Error sharing trip:', err);
+    }
   };
 
-  const categoryColors = {
-    Hotel: 'bg-purple-100 text-purple-700',
-    Restaurant: 'bg-orange-100 text-orange-700',
-    Attraction: 'bg-blue-100 text-blue-700',
-    Transport: 'bg-gray-100 text-gray-700',
-    Activity: 'bg-green-100 text-green-700',
-    Other: 'bg-yellow-100 text-yellow-700',
+  const copyShare = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
+
+  // Build sequential timeline days
+  const allStops = stops || [];
+  let dayCounter = 1;
+  const stopsWithDays = allStops.map((stop, idx) => {
+    const start = stop.start_date ? new Date(stop.start_date) : null;
+    const end = stop.end_date ? new Date(stop.end_date) : null;
+    const daysInStop = start && end ? Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24))) : 2;
+
+    const stopDays = [];
+    for (let d = 0; d < daysInStop; d++) {
+      stopDays.push({
+        dayNumber: dayCounter++,
+        label: `Day ${dayCounter - 1}`,
+      });
+    }
+
+    return {
+      ...stop,
+      days: stopDays,
+      chapterNumber: (idx + 1).toString().padStart(2, '0'),
+    };
+  });
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto animate-pulse space-y-4">
-        <div className="bg-gray-200 h-8 rounded w-1/3"></div>
-        {[1,2,3].map(i => <div key={i} className="bg-gray-200 h-20 rounded-xl"></div>)}
+      <div className="py-24 text-center">
+        <div className="w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs font-mono uppercase tracking-wider text-ink-muted">Loading journey timeline...</p>
+      </div>
+    );
+  }
+
+  if (!trip) {
+    return (
+      <div className="text-center py-20 bg-white rounded-4xl border border-black/5 p-8">
+        <h3 className="font-display text-xl font-bold text-ink">Journey not found</h3>
+        <Link to="/trips" className="mt-4 inline-block px-5 py-2.5 rounded-full bg-ink text-white text-xs font-semibold">
+          Back to My Trips
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
-        <div>
-          <Link to={`/trips/${tripId}`} className="text-xs text-gray-500 hover:text-blue-600 transition">← {trip?.name || 'Trip Details'}</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">Itinerary</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Plan your stops and activities</p>
+    <div className="max-w-4xl mx-auto space-y-12">
+      {/* Trip Hero Header */}
+      <div className="relative rounded-4xl sm:rounded-5xl overflow-hidden min-h-[340px] p-6 sm:p-10 flex flex-col justify-between text-white shadow-soft">
+        <img
+          src={trip.cover_image || 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1600&auto=format&fit=crop&q=80'}
+          alt={trip.name}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 photo-overlay" />
+
+        {/* Top Controls */}
+        <div className="relative z-10 flex items-center justify-between">
+          <Link
+            to="/trips"
+            className="px-4 py-1.5 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 text-xs font-medium text-white transition-all"
+          >
+            ← All Journeys
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              to={`/trips/${tripId}/edit`}
+              className="p-2.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white transition-all"
+              title="Edit Stops"
+            >
+              <Edit3 className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={handleShare}
+              className="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Share Journal</span>
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition"
-        >
-          + Add Stop
-        </button>
+
+        {/* Bottom Hero Text */}
+        <div className="relative z-10 max-w-2xl">
+          <Eyebrow color="text-[#9af1f5] mb-1">
+            {trip.start_date ? `${new Date(trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${new Date(trip.end_date || trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'FLEXIBLE EXPEDITION'}
+          </Eyebrow>
+          <h1 className="font-display text-3xl sm:text-5xl font-bold tracking-tight text-white drop-shadow-sm leading-tight">
+            {trip.name}
+          </h1>
+          <p className="text-xs sm:text-sm text-white/90 line-clamp-2 mt-2 font-light">
+            {trip.description || 'Day-by-day vertical timeline with scheduled activities, departure transitions, and costs.'}
+          </p>
+
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-white/20 text-xs text-white/80">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-[#9af1f5]" />
+              {stops.length} Cities Planned
+            </span>
+            <Link
+              to={`/trips/${tripId}/budget`}
+              className="text-[#9af1f5] hover:underline font-semibold flex items-center gap-1"
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+              View Trip Budget
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 text-sm rounded">{error}</div>
-      )}
-
-      {/* Add Stop Form */}
-      {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-blue-200 p-5">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Add New Stop</h2>
-          {formError && <p className="text-red-600 text-sm mb-3">{formError}</p>}
-          <form onSubmit={handleAddStop} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Stop Name <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g. Tokyo Tower"
-                  value={stopName}
-                  onChange={(e) => setStopName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={stopCategory}
-                  onChange={(e) => setStopCategory(e.target.value)}
-                >
-                  {STOP_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input
-                  type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={stopDate}
-                  onChange={(e) => setStopDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Optional notes..."
-                  value={stopNotes}
-                  onChange={(e) => setStopNotes(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-              <button type="submit" disabled={submitting} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50">
-                {submitting ? 'Adding...' : 'Add Stop'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Stops List */}
-      {stops.length === 0 ? (
-        <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <h3 className="mt-2 text-base font-semibold text-gray-900">No stops yet</h3>
-          <p className="text-sm text-gray-500 mt-1">Add your first stop to start building your itinerary.</p>
-          <button onClick={() => setShowForm(true)} className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700">
-            + Add First Stop
+      {/* Day Filter Pills */}
+      {stopsWithDays.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <button
+            onClick={() => setActiveDay('all')}
+            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              activeDay === 'all'
+                ? 'bg-ink text-white shadow-sm'
+                : 'bg-white text-ink-secondary hover:bg-black/5 border border-black/5'
+            }`}
+          >
+            All Chapters & Days
           </button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {stops.map((stop, idx) => (
-            <div key={stop.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-start gap-4 hover:shadow-md transition">
-              {/* Step number */}
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center flex-shrink-0">
-                {idx + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-gray-900 text-sm">{stop.name}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${categoryColors[stop.category] || 'bg-gray-100 text-gray-700'}`}>
-                    {stop.category}
-                  </span>
-                  {stop._local && (
-                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Session only</span>
-                  )}
-                </div>
-                {stop.date && <p className="text-xs text-gray-500 mt-1">{new Date(stop.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
-                {stop.notes && <p className="text-xs text-gray-500 mt-1">{stop.notes}</p>}
-              </div>
-              <button
-                onClick={() => handleRemoveStop(stop.id)}
-                className="text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition flex-shrink-0"
-              >
-                Remove
-              </button>
-            </div>
+          {stopsWithDays.map((stop) => (
+            <button
+              key={stop.id}
+              onClick={() => setActiveDay(stop.id)}
+              className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                activeDay === stop.id
+                  ? 'bg-ink text-white shadow-sm'
+                  : 'bg-white text-ink-secondary hover:bg-black/5 border border-black/5'
+              }`}
+            >
+              {stop.city_name}
+            </button>
           ))}
         </div>
       )}
+
+      {/* Chapter by Chapter Timeline */}
+      {stops.length === 0 ? (
+        <div className="bg-white rounded-4xl p-12 text-center border border-black/5 shadow-soft">
+          <Compass className="w-10 h-10 text-teal mx-auto mb-2" />
+          <h3 className="font-display text-xl font-bold text-ink">Itinerary is Empty</h3>
+          <p className="text-xs text-ink-secondary mt-1 mb-6">
+            Add modular city sections and schedule activities in the builder.
+          </p>
+          <Link
+            to={`/trips/${tripId}/edit`}
+            className="px-6 py-3 rounded-full bg-ink text-white text-xs font-semibold inline-flex items-center gap-2 hover:bg-black transition-all"
+          >
+            <Plus className="w-4 h-4 text-[#9af1f5]" />
+            <span>Open Itinerary Builder</span>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-12">
+          {stopsWithDays
+            .filter((stop) => activeDay === 'all' || activeDay === stop.id)
+            .map((stop, stopIdx, filteredArr) => (
+              <div key={stop.id} className="space-y-8">
+                {/* Chapter Eyebrow & City Title */}
+                <div className="border-b border-black/5 pb-3">
+                  <Eyebrow color="text-teal">CHAPTER {stop.chapterNumber}</Eyebrow>
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink mt-0.5 flex items-center justify-between">
+                    <span>{stop.city_name}</span>
+                    <span className="text-xs font-normal text-ink-muted">
+                      {stop.start_date ? new Date(stop.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Day 1'}
+                      {stop.end_date ? ` – ${new Date(stop.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                    </span>
+                  </h2>
+                </div>
+
+                {/* Day-by-Day Vertical Timeline */}
+                <div className="relative pl-6 sm:pl-8 border-l-2 border-black/10 space-y-8 ml-3">
+                  {(!stop.activities || stop.activities.length === 0) ? (
+                    <div className="p-5 bg-white rounded-3xl border border-dashed border-black/10 text-xs text-ink-muted flex items-center justify-between">
+                      <span>No activities scheduled in {stop.city_name}.</span>
+                      <Link
+                        to={`/trips/${tripId}/edit`}
+                        className="font-semibold text-teal hover:underline flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Add in Builder
+                      </Link>
+                    </div>
+                  ) : (
+                    stop.activities.map((act, actIdx) => (
+                      <div key={act.id} className="relative group">
+                        {/* Timeline Connector Dot */}
+                        <div className="absolute -left-[31px] sm:-left-[39px] top-6 w-4 h-4 rounded-full bg-white border-4 border-ink group-hover:border-teal transition-colors" />
+
+                        {/* Horizontal Activity Card */}
+                        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-black/5 shadow-soft hover:shadow-float transition-all flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-5">
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            {act.image_url ? (
+                              <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0">
+                                <img
+                                  src={act.image_url}
+                                  alt={act.name}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-20 h-20 rounded-2xl bg-sand/30 flex items-center justify-center shrink-0 text-ink">
+                                <Sparkles className="w-6 h-6 text-teal" />
+                              </div>
+                            )}
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 rounded-full bg-[#fcf9f3] text-teal text-[10px] font-semibold font-mono uppercase border border-black/5">
+                                  {act.type}
+                                </span>
+                                <span className="text-xs text-ink-muted flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {act.start_time || '09:00 AM'} ({act.duration_hours || 1}h)
+                                </span>
+                              </div>
+
+                              <h4 className="font-display font-bold text-base sm:text-lg text-ink truncate group-hover:text-teal transition-colors">
+                                {act.name}
+                              </h4>
+
+                              {act.description && (
+                                <p className="text-xs text-ink-secondary line-clamp-1 mt-0.5 font-light">
+                                  {act.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Cost shown alongside activity */}
+                          <div className="border-t sm:border-t-0 sm:border-l border-black/5 pt-3 sm:pt-0 sm:pl-5 flex items-center justify-between sm:flex-col sm:items-end shrink-0">
+                            <span className="text-[10px] uppercase font-mono text-ink-muted">Cost</span>
+                            <span className="font-display font-bold text-sm sm:text-base text-ink">
+                              {act.cost > 0 ? `₹${parseFloat(act.cost).toLocaleString('en-IN')}` : 'Free'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Magazine Chapter Transition Banner (between cities) */}
+                {stopIdx < filteredArr.length - 1 && (
+                  <div className="relative rounded-3xl overflow-hidden min-h-[160px] p-6 sm:p-8 flex items-center justify-between text-white my-8 shadow-soft">
+                    <img
+                      src="https://images.unsplash.com/photo-1476610182048-b716b8518aae?w=1200&auto=format&fit=crop&q=80"
+                      alt="Transition scenic"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-ink/75 backdrop-blur-[2px]" />
+
+                    <div className="relative z-10 max-w-md">
+                      <Eyebrow color="text-[#9af1f5] mb-1">CHAPTER TRANSITION</Eyebrow>
+                      <h4 className="font-display text-xl sm:text-2xl font-bold text-white">
+                        Departing {stop.city_name} — Next: {filteredArr[stopIdx + 1].city_name}
+                      </h4>
+                      <p className="text-xs text-white/80 mt-1 font-light">
+                        Pack bags, check train timetables, and prepare for the next chapter.
+                      </p>
+                    </div>
+
+                    <div className="relative z-10 hidden sm:block">
+                      <ArrowRight className="w-8 h-8 text-[#9af1f5]" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+        </div>
+      )}
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={shareModal}
+        onClose={() => setShareModal(false)}
+        title="Share Journal Story"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-ink-secondary">
+            Send this read-only link to friends or fellow travelers:
+          </p>
+          <div className="flex items-center gap-2 p-2 bg-white rounded-full border border-black/10">
+            <input
+              type="text"
+              readOnly
+              value={shareUrl}
+              className="flex-1 bg-transparent px-3 text-xs text-ink font-mono focus:outline-none"
+            />
+            <button
+              onClick={copyShare}
+              className="px-4 py-2 rounded-full bg-ink text-white hover:bg-black text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <span>Copy Link</span>
+              )}
+            </button>
+          </div>
+          <div className="pt-2 text-center">
+            <Link
+              to={`/shared/${trip?.share_token || shareUrl.split('/').pop()}`}
+              target="_blank"
+              className="text-xs font-bold text-teal hover:underline inline-flex items-center gap-1"
+            >
+              <span>View Shared Page Preview</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

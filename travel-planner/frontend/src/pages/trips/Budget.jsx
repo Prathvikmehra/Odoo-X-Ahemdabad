@@ -1,236 +1,382 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { api } from '../../services/api';
+import { expenseService } from '../../services/expenseService';
 import { tripService } from '../../services/tripService';
-
-const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Accommodation', 'Activities', 'Shopping', 'Other'];
-
-const CATEGORY_COLORS = {
-  Food: 'bg-orange-100 text-orange-700 border-orange-200',
-  Transport: 'bg-blue-100 text-blue-700 border-blue-200',
-  Accommodation: 'bg-purple-100 text-purple-700 border-purple-200',
-  Activities: 'bg-green-100 text-green-700 border-green-200',
-  Shopping: 'bg-pink-100 text-pink-700 border-pink-200',
-  Other: 'bg-gray-100 text-gray-700 border-gray-200',
-};
+import {
+  DollarSign,
+  Plus,
+  Trash2,
+  PieChart,
+  ArrowRight,
+  TrendingUp,
+  CreditCard,
+  CheckCircle,
+  Tag,
+  Clock,
+  Sparkles
+} from 'lucide-react';
+import Eyebrow from '../../components/common/Eyebrow';
+import Modal from '../../components/common/Modal';
 
 export default function Budget() {
   const { tripId } = useParams();
   const [trip, setTrip] = useState(null);
   const [expenses, setExpenses] = useState([]);
-  const [budgetSummary, setBudgetSummary] = useState(null);
+  const [budgetSummary, setBudgetSummary] = useState({ total: 0, categories: {} });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showForm, setShowForm] = useState(false);
 
-  // Form state
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('Food');
-  const [description, setDescription] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState('');
+  // New Expense Modal
+  const [expenseModal, setExpenseModal] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({
+    amount: '',
+    category: 'Accommodation',
+    description: '',
+  });
 
-  const fetchData = async () => {
+  const categoriesList = [
+    'Accommodation',
+    'Transport',
+    'Activities',
+    'Food & Dining',
+    'Shopping',
+    'Miscellaneous'
+  ];
+
+  const categoryColors = {
+    Accommodation: '#00696d', // Teal
+    Transport: '#1c1c18',    // Dark ink
+    Activities: '#dbc3a8',   // Sand
+    'Food & Dining': '#e07a5f', // Terracotta
+    Shopping: '#3d405b',     // Slate
+    Miscellaneous: '#81b29a', // Sage
+  };
+
+  useEffect(() => {
+    loadBudgetData();
+  }, [tripId]);
+
+  const loadBudgetData = async () => {
     try {
-      const [tripData, expensesRes, budgetRes] = await Promise.all([
-        tripService.getTrip(tripId),
-        api.get(`/trips/${tripId}/expenses`),
-        api.get(`/trips/${tripId}/budget`),
+      setLoading(true);
+      const [tripData, expData, bData] = await Promise.all([
+        tripService.getTripById(tripId),
+        expenseService.getExpenses(tripId),
+        expenseService.getBudget(tripId),
       ]);
       setTrip(tripData);
-      setExpenses(expensesRes.data);
-      setBudgetSummary(budgetRes.data);
+      setExpenses(Array.isArray(expData) ? expData : []);
+      setBudgetSummary(bData || { total: 0, categories: {} });
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to load budget data');
+      console.error('Error loading budget details:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [tripId]);
-
-  const handleAddExpense = async (e) => {
+  const handleCreateExpense = async (e) => {
     e.preventDefault();
-    setFormError('');
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      setFormError('Enter a valid positive amount');
-      return;
-    }
-    setSubmitting(true);
     try {
-      await api.post(`/trips/${tripId}/expenses`, {
-        amount: parsedAmount,
-        category,
-        description: description || null,
+      await expenseService.createExpense(tripId, {
+        amount: parseFloat(expenseForm.amount),
+        category: expenseForm.category,
+        description: expenseForm.description || '',
       });
-      setAmount('');
-      setCategory('Food');
-      setDescription('');
-      setShowForm(false);
-      // Refresh both expenses and budget summary
-      await fetchData();
+      setExpenseModal(false);
+      setExpenseForm({ amount: '', category: 'Accommodation', description: '' });
+      loadBudgetData();
     } catch (err) {
-      setFormError(err.response?.data?.detail || 'Failed to add expense');
-    } finally {
-      setSubmitting(false);
+      console.error('Error creating expense:', err);
     }
   };
 
-  const formatCurrency = (val) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val || 0);
+  const handleDeleteExpense = async (id) => {
+    try {
+      await expenseService.deleteExpense(id);
+      loadBudgetData();
+    } catch (err) {
+      console.error('Error deleting expense:', err);
+    }
+  };
+
+  // Find biggest expense
+  const biggestExpense = expenses.length > 0
+    ? [...expenses].sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))[0]
+    : null;
+
+  const totalCost = budgetSummary.total || 0;
+  const categoriesMap = budgetSummary.categories || {};
+
+  // Build visual progress bars
+  const categoryKeys = Object.keys(categoriesMap);
+  let cumulativePercent = 0;
+
+  const donutSlices = categoryKeys.map((cat) => {
+    const amount = categoriesMap[cat] || 0;
+    const percent = totalCost > 0 ? (amount / totalCost) * 100 : 0;
+    const startAngle = (cumulativePercent / 100) * 360;
+    cumulativePercent += percent;
+    const endAngle = (cumulativePercent / 100) * 360;
+    return {
+      cat,
+      amount,
+      percent,
+      color: categoryColors[cat] || '#76777d',
+      startAngle,
+      endAngle,
+    };
+  });
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto animate-pulse space-y-4">
-        <div className="bg-gray-200 h-8 rounded w-1/3"></div>
-        <div className="bg-gray-200 h-32 rounded-xl"></div>
-        {[1,2,3].map(i => <div key={i} className="bg-gray-200 h-16 rounded-xl"></div>)}
+      <div className="py-24 text-center">
+        <div className="w-8 h-8 border-2 border-ink border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs font-mono uppercase tracking-wider text-ink-muted">Calculating journey budget...</p>
       </div>
     );
   }
 
-  const categoryBreakdown = budgetSummary?.categories || {};
-  const total = budgetSummary?.total || 0;
-
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-black/5 pb-6">
         <div>
-          <Link to={`/trips/${tripId}`} className="text-xs text-gray-500 hover:text-blue-600 transition">← {trip?.name || 'Trip Details'}</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">Budget</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Track your trip expenses</p>
+          <Eyebrow color="text-teal">FINANCIAL JOURNAL & LEDGER</Eyebrow>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-ink mt-1">
+            Trip Budget & Cost Breakdown
+          </h1>
+          <p className="text-xs sm:text-sm text-ink-secondary mt-1">
+            {trip?.name || 'Journey Expenses'} — real-time category distribution & itemized log.
+          </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition"
-        >
-          + Add Expense
-        </button>
+
+        <div className="flex items-center gap-2">
+          <Link
+            to={`/trips/${tripId}/itinerary`}
+            className="px-4 py-2.5 rounded-full border border-black/10 hover:bg-black/5 text-xs font-semibold text-ink transition-all"
+          >
+            ← View Itinerary
+          </Link>
+          <button
+            onClick={() => setExpenseModal(true)}
+            className="px-5 py-2.5 rounded-full bg-ink hover:bg-black text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
+          >
+            <Plus className="w-4 h-4 text-[#9af1f5]" />
+            <span>Log Expense</span>
+          </button>
+        </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-700 text-sm rounded">{error}</div>
-      )}
-
-      {/* Budget Summary Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-900">Total Spent</h2>
-          <span className="text-2xl font-bold text-gray-900">{formatCurrency(total)}</span>
-        </div>
-
-        {Object.keys(categoryBreakdown).length > 0 ? (
-          <div className="space-y-2">
-            {Object.entries(categoryBreakdown).map(([cat, amt]) => {
-              const pct = total > 0 ? (amt / total) * 100 : 0;
-              return (
-                <div key={cat}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="font-medium text-gray-700">{cat}</span>
-                    <span className="text-gray-600">{formatCurrency(amt)} ({pct.toFixed(0)}%)</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div
-                      className="bg-green-500 h-2 rounded-full transition-all"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+      {/* 1. Big Display-Size Total Cost Figure at Top */}
+      <div className="bg-white rounded-4xl sm:rounded-5xl p-8 sm:p-12 border border-black/5 shadow-soft relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="space-y-2 text-center md:text-left">
+          <Eyebrow color="text-teal">WHAT WILL THIS JOURNEY COST?</Eyebrow>
+          <div className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-ink tracking-tight-display">
+            ₹{parseFloat(totalCost).toLocaleString('en-IN')}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">No expenses yet. Add your first expense to start tracking.</p>
-        )}
+          <p className="text-xs sm:text-sm text-ink-secondary max-w-sm">
+            Total recorded across all accommodation, transportation, dining, and activities.
+          </p>
+        </div>
+
+        {/* Small Stat Pills */}
+        <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto">
+          <div className="p-4 bg-[#fcf9f3] rounded-2xl border border-black/5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-ink text-white flex items-center justify-center font-bold text-xs">
+              <TrendingUp className="w-4 h-4 text-[#9af1f5]" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase text-ink-muted block">Biggest Expense</span>
+              <span className="font-display font-bold text-xs sm:text-sm text-ink">
+                {biggestExpense ? `${biggestExpense.description || biggestExpense.category} (₹${parseFloat(biggestExpense.amount).toLocaleString('en-IN')})` : 'None logged'}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 bg-[#fcf9f3] rounded-2xl border border-black/5 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-sand text-ink flex items-center justify-center font-bold text-xs">
+              <Tag className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono uppercase text-ink-muted block">Items Recorded</span>
+              <span className="font-display font-bold text-xs sm:text-sm text-ink">
+                {expenses.length} distinct entries
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Add Expense Form */}
-      {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-green-200 p-5">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Add Expense</h2>
-          {formError && <p className="text-red-600 text-sm mb-3">{formError}</p>}
-          <form onSubmit={handleAddExpense} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (USD) <span className="text-red-500">*</span></label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
+      {/* 2. Visual Breakdown & Checklist Side-by-Side Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Progress distribution visualizer */}
+        <div className="lg:col-span-5 bg-white rounded-4xl p-6 sm:p-8 border border-black/5 shadow-soft flex flex-col justify-between">
+          <div>
+            <Eyebrow color="text-teal">EXPENSE ALLOCATION</Eyebrow>
+            <h3 className="font-display text-xl font-bold text-ink mt-1 mb-6">Category Distribution</h3>
+          </div>
+
+          {totalCost === 0 ? (
+            <div className="py-12 text-center text-ink-muted text-xs">
+              No expenses recorded yet. Click "Log Expense" to visualize category distribution.
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="h-4 rounded-full bg-black/5 flex overflow-hidden shadow-inner">
+                {donutSlices.map((slice) => (
+                  <div
+                    key={slice.cat}
+                    style={{
+                      width: `${slice.percent}%`,
+                      backgroundColor: slice.color,
+                    }}
+                    title={`${slice.cat}: ₹${slice.amount.toLocaleString('en-IN')} (${slice.percent.toFixed(1)}%)`}
+                    className="h-full transition-all"
+                  />
+                ))}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+
+              {/* Category Legend list */}
+              <div className="space-y-2.5">
+                {donutSlices.map((slice) => (
+                  <div key={slice.cat} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: slice.color }}
+                      />
+                      <span className="text-ink font-medium">{slice.cat}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-ink font-bold">₹{parseFloat(slice.amount).toLocaleString('en-IN')}</span>
+                      <span className="text-ink-muted font-mono text-[10px]">({slice.percent.toFixed(0)}%)</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 3. Checklist-style Itemized Expenses Panel */}
+        <div className="lg:col-span-7 bg-white rounded-4xl p-6 sm:p-8 border border-black/5 shadow-soft space-y-4">
+          <div className="flex items-center justify-between border-b border-black/5 pb-4">
+            <div>
+              <Eyebrow color="text-ink-muted">ITEMIZED EXPENSES</Eyebrow>
+              <h3 className="font-display text-xl font-bold text-ink">Ledger Checklist</h3>
+            </div>
+            <span className="text-xs font-mono font-semibold text-teal">
+              {expenses.length} Records
+            </span>
+          </div>
+
+          {expenses.length === 0 ? (
+            <div className="py-12 text-center text-ink-muted text-xs">
+              No transactions entered yet. Add flight tickets, hotel reservations, dinners, or activity passes.
+            </div>
+          ) : (
+            <div className="space-y-2.5 max-h-[440px] overflow-y-auto pr-1">
+              {expenses.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="flex items-center justify-between p-4 bg-[#fcf9f3]/80 rounded-2xl border border-black/5 hover:bg-[#fcf9f3] transition-all group"
                 >
-                  {EXPENSE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-                  placeholder="e.g. Dinner at ramen shop"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-2">
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-              <button type="submit" disabled={submitting} className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50">
-                {submitting ? 'Adding...' : 'Add Expense'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: categoryColors[exp.category] || '#76777d' }}
+                    />
+                    <div className="min-w-0">
+                      <h5 className="font-display font-bold text-xs sm:text-sm text-ink truncate">
+                        {exp.description || exp.category}
+                      </h5>
+                      <span className="text-[10px] font-mono uppercase text-ink-muted">
+                        {exp.category}
+                      </span>
+                    </div>
+                  </div>
 
-      {/* Expense List */}
-      {expenses.length === 0 ? (
-        <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-10 text-center">
-          <svg className="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h3 className="mt-2 text-base font-semibold text-gray-900">No expenses recorded</h3>
-          <p className="text-sm text-gray-500 mt-1">Start tracking your spending by adding an expense.</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700">All Expenses ({expenses.length})</h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {expenses.map((exp) => (
-              <div key={exp.id} className="px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${CATEGORY_COLORS[exp.category] || CATEGORY_COLORS.Other}`}>
-                  {exp.category}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 truncate">{exp.description || '—'}</p>
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span className="font-display font-bold text-sm text-ink">
+                      ₹{parseFloat(exp.amount).toLocaleString('en-IN')}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteExpense(exp.id)}
+                      className="p-1.5 rounded-full hover:bg-red-50 text-ink-muted hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                      title="Delete Entry"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 flex-shrink-0">{formatCurrency(exp.amount)}</span>
-              </div>
-            ))}
-          </div>
-          <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-600">Total</span>
-            <span className="text-base font-bold text-gray-900">{formatCurrency(total)}</span>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Log Expense Modal */}
+      <Modal
+        isOpen={expenseModal}
+        onClose={() => setExpenseModal(false)}
+        title="Record Expense Item"
+      >
+        <form onSubmit={handleCreateExpense} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1 font-mono">
+              Amount (₹) *
+            </label>
+            <input
+              type="number"
+              step="any"
+              required
+              min="0"
+              value={expenseForm.amount}
+              onChange={(e) => setExpenseForm({ ...expenseForm, amount: e.target.value })}
+              placeholder="e.g. 4500"
+              className="w-full px-4 py-3 bg-white border border-black/10 rounded-full text-xs text-ink focus:outline-none focus:ring-2 focus:ring-teal/30 font-display font-bold text-base"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1 font-mono">
+              Category
+            </label>
+            <select
+              value={expenseForm.category}
+              onChange={(e) => setExpenseForm({ ...expenseForm, category: e.target.value })}
+              className="w-full px-4 py-3 bg-white border border-black/10 rounded-full text-xs text-ink focus:outline-none focus:ring-2 focus:ring-teal/30"
+            >
+              {categoriesList.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1 font-mono">
+              Description / Notes
+            </label>
+            <input
+              type="text"
+              value={expenseForm.description}
+              onChange={(e) => setExpenseForm({ ...expenseForm, description: e.target.value })}
+              placeholder="e.g. Shinkansen Bullet Train Tokyo to Kyoto"
+              className="w-full px-4 py-3 bg-white border border-black/10 rounded-full text-xs text-ink focus:outline-none focus:ring-2 focus:ring-teal/30"
+            />
+          </div>
+
+          <div className="pt-3">
+            <button
+              type="submit"
+              className="w-full py-3.5 rounded-full bg-ink hover:bg-black text-white text-xs font-semibold tracking-wide"
+            >
+              Add to Journey Budget
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

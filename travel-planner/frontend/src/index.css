@@ -1,3 +1,91 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-cream-50: #fdfcf9;
+  --color-cream-100: #fcf9f3;
+  --color-cream-200: #f7f2e7;
+  --color-cream-300: #eee6d4;
+  --color-cream-400: #e3d7bf;
+
+  --color-ink: #1c1c18;
+  --color-ink-secondary: #46464c;
+  --color-ink-muted: #76777d;
+  --color-ink-faint: #c6c6cc;
+
+  --color-teal: #00696d;
+  --color-teal-accent: #00696d;
+  --color-teal-light: #9af1f5;
+  --color-teal-soft: #e6f7f8;
+  --color-teal-dark: #004f52;
+
+  --color-sand: #dbc3a8;
+  --color-sand-soft: #f5ede4;
+  --color-sand-dark: #261908;
+
+  --font-sans: 'Geist', 'Plus Jakarta Sans', 'Outfit', sans-serif;
+  --font-display: 'Geist', 'Outfit', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  --radius-5xl: 48px;
+
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 20px 40px -15px rgba(28, 28, 24, 0.08);
+  --shadow-modal: 0 25px 50px -12px rgba(28, 28, 24, 0.25);
+
+  --letter-spacing-eyebrow: 0.12em;
+  --letter-spacing-tight-display: -0.035em;
+}
+
+@layer base {
+  body {
+    background-color: #fcf9f3;
+    color: #1c1c18;
+    font-family: 'Geist', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.03em;
+    font-weight: 700;
+  }
+}
+
+/* Custom transitions and scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fcf9f3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4cfc4;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0aba0;
+}
+
+/* Editorial Glass & Hairline helpers */
+.border-hairline {
+  border-color: rgba(28, 28, 24, 0.08);
+}
+
+.hairline-divide > * + * {
+  border-top-width: 1px;
+  border-color: rgba(28, 28, 24, 0.08);
+}
+
+.photo-overlay {
+  background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.75) 100%);
+}
+
+.photo-overlay-center {
+  background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 100%);
+}

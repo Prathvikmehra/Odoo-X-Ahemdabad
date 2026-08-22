@@ -1,90 +1,232 @@
-import { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { Calendar, MapPin, DollarSign, Edit3, Trash2, Share2, ArrowRight } from 'lucide-react';
+import Eyebrow from '../common/Eyebrow';
 
-export default function TripCard({ trip, onDelete }) {
-  const [imageError, setImageError] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+export default function TripCard({
+  trip,
+  onDelete,
+  onShare,
+  viewMode = 'grid' // 'grid' or 'row'
+}) {
+  const defaultImage = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80';
+  const coverImage = trip.cover_image || defaultImage;
 
-  const handleDelete = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!window.confirm(`Are you sure you want to delete "${trip.name}"?`)) {
-      return;
-    }
-
-    setIsDeleting(true);
-    try {
-      await onDelete(trip.id);
-    } catch {
-      setIsDeleting(false);
-    }
-  };
-
+  // Format dates
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
   };
 
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition">
-      {/* Cover Image or Fallback Gradient */}
-      <div className="h-48 w-full relative bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center">
-        {trip.cover_image && !imageError ? (
-          <img
-            src={trip.cover_image}
-            alt={trip.name}
-            onError={() => setImageError(true)}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="text-center p-4 text-white">
-            <svg className="w-12 h-12 mx-auto mb-1 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V7a2 2 0 00-2-2h-1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-xs font-semibold uppercase tracking-wider opacity-90">Trip Banner</span>
-          </div>
-        )}
-      </div>
+  const getTripStatus = (start, end) => {
+    if (!start) return 'Upcoming';
+    const now = new Date();
+    const startDate = new Date(start);
+    const endDate = end ? new Date(end) : startDate;
+    if (now >= startDate && now <= endDate) return 'Ongoing';
+    if (now > endDate) return 'Completed';
+    return 'Upcoming';
+  };
 
-      {/* Card Content */}
-      <div className="p-5 flex-1 flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{trip.name}</h3>
-          </div>
+  const status = getTripStatus(trip.start_date, trip.end_date);
+  const statusColors = {
+    Ongoing: 'bg-emerald-500/90 text-white',
+    Upcoming: 'bg-[#00696d] text-white',
+    Completed: 'bg-black/60 text-white',
+  };
 
-          <p className="text-sm text-gray-600 line-clamp-2 mb-4">
-            {trip.description || 'No description provided.'}
-          </p>
-
-          <div className="flex items-center text-xs text-gray-500 space-x-1 mb-4">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>
-              {formatDate(trip.start_date)} - {formatDate(trip.end_date)}
+  if (viewMode === 'row') {
+    return (
+      <div className="group bg-white rounded-3xl p-4 sm:p-5 border border-black/5 shadow-soft hover:shadow-float transition-all duration-300 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5">
+        <div className="flex items-center gap-4 sm:gap-6 flex-1 min-w-0">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden shrink-0 relative">
+            <img
+              src={coverImage}
+              alt={trip.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+            <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase font-mono ${statusColors[status]}`}>
+              {status}
             </span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Eyebrow color="text-teal">{trip.stops?.length ? `${trip.stops.length} STOPS` : 'JOURNEY'}</Eyebrow>
+              {trip.is_public && (
+                <span className="px-2 py-0.5 rounded-full bg-teal-soft text-teal text-[10px] font-semibold">
+                  Shared
+                </span>
+              )}
+            </div>
+            <h3 className="font-display text-lg sm:text-xl font-bold text-ink truncate group-hover:text-teal transition-colors">
+              <Link to={`/trips/${trip.id}/itinerary`}>{trip.name}</Link>
+            </h3>
+            <p className="text-xs text-ink-secondary line-clamp-1 mt-0.5">
+              {trip.description || 'No description provided.'}
+            </p>
+            <div className="flex items-center gap-4 text-xs text-ink-muted mt-2">
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                {formatDate(trip.start_date)} — {formatDate(trip.end_date)}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 mt-auto">
+        {/* Actions */}
+        <div className="flex items-center gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-black/5 shrink-0">
           <Link
-            to={`/trips/${trip.id}`}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 transition"
+            to={`/trips/${trip.id}/itinerary`}
+            className="px-4 py-2 rounded-full bg-ink text-white hover:bg-black text-xs font-semibold flex items-center gap-1.5 transition-all"
           >
-            View Details &rarr;
+            <span>View Timeline</span>
+            <ArrowRight className="w-3 h-3" />
           </Link>
-
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-2.5 py-1 rounded transition disabled:opacity-50"
+          <Link
+            to={`/trips/${trip.id}/edit`}
+            className="p-2 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+            title="Edit Itinerary"
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </button>
+            <Edit3 className="w-4 h-4" />
+          </Link>
+          <Link
+            to={`/trips/${trip.id}/budget`}
+            className="p-2 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+            title="Budget & Expenses"
+          >
+            <DollarSign className="w-4 h-4" />
+          </Link>
+          {onShare && (
+            <button
+              onClick={() => onShare(trip)}
+              className="p-2 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+              title="Share Trip"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(trip.id)}
+              className="p-2 rounded-full border border-black/10 hover:bg-red-50 hover:border-red-200 text-ink-muted hover:text-red-600 transition-all"
+              title="Delete Trip"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Grid Card Mode
+  return (
+    <div className="group relative bg-white rounded-3xl overflow-hidden border border-black/5 shadow-soft hover:shadow-float transition-all duration-300 flex flex-col">
+      {/* Cover Image with gradient overlay */}
+      <div className="relative h-56 w-full overflow-hidden bg-sand/20">
+        <img
+          src={coverImage}
+          alt={trip.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+        />
+        <div className="absolute inset-0 photo-overlay pointer-events-none" />
+
+        {/* Top Badges */}
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-auto">
+          <span className={`px-3 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase font-mono shadow-sm ${statusColors[status]}`}>
+            {status}
+          </span>
+          {trip.is_public && (
+            <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-teal text-[10px] font-bold shadow-sm">
+              Public Story
+            </span>
+          )}
+        </div>
+
+        {/* Overlay Title */}
+        <div className="absolute bottom-4 left-4 right-4 text-white">
+          <Eyebrow color="text-[#9af1f5] mb-1">
+            {trip.stops?.length ? `${trip.stops.length} CITIES PLANNED` : 'MULTI-CITY EXPEDITION'}
+          </Eyebrow>
+          <h3 className="font-display text-xl font-bold tracking-tight text-white leading-snug drop-shadow-sm">
+            {trip.name}
+          </h3>
+        </div>
+      </div>
+
+      {/* Body content */}
+      <div className="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          <p className="text-xs text-ink-secondary line-clamp-2 leading-relaxed mb-4">
+            {trip.description || 'An inspiring journey planned with custom daily stops, curated activities, and budget tracking.'}
+          </p>
+
+          <div className="space-y-2 text-xs text-ink-muted border-t border-black/5 pt-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-teal" />
+              <span>{formatDate(trip.start_date)} — {formatDate(trip.end_date)}</span>
+            </div>
+            {trip.stops && trip.stops.length > 0 && (
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-teal" />
+                <span className="truncate">
+                  {trip.stops.map((s) => s.city_name).join(' → ')}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Card Footer Actions */}
+        <div className="flex items-center justify-between gap-2 border-t border-black/5 pt-4 mt-4">
+          <Link
+            to={`/trips/${trip.id}/itinerary`}
+            className="flex-1 text-center py-2.5 px-4 rounded-full bg-ink text-white hover:bg-black text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5"
+          >
+            <span>View Itinerary</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+          
+          <div className="flex items-center gap-1">
+            <Link
+              to={`/trips/${trip.id}/edit`}
+              className="p-2.5 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+              title="Edit Stops"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </Link>
+            <Link
+              to={`/trips/${trip.id}/budget`}
+              className="p-2.5 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+              title="Budget"
+            >
+              <DollarSign className="w-3.5 h-3.5" />
+            </Link>
+            {onShare && (
+              <button
+                onClick={() => onShare(trip)}
+                className="p-2.5 rounded-full border border-black/10 hover:bg-black/5 text-ink-secondary hover:text-ink transition-all"
+                title="Share Trip"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(trip.id)}
+                className="p-2.5 rounded-full border border-black/10 hover:bg-red-50 text-ink-muted hover:text-red-600 transition-all"
+                title="Delete Trip"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

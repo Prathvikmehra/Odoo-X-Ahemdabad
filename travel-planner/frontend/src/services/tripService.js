@@ -1,12 +1,12 @@
 import { api } from './api';
 
 export const tripService = {
-  async getTrips() {
+  async getAllTrips() {
     const response = await api.get('/trips/');
-    return response.data; // Raw array List[TripOut]
+    return response.data;
   },
 
-  async getTrip(id) {
+  async getTripById(id) {
     const response = await api.get(`/trips/${id}`);
     return response.data;
   },
@@ -23,6 +23,16 @@ export const tripService = {
 
   async deleteTrip(id) {
     const response = await api.delete(`/trips/${id}`);
-    return response.data; // 204 No Content
+    return response.data;
   },
+
+  async shareTrip(id) {
+    const response = await api.post(`/trips/${id}/share`);
+    return response.data;
+  },
+
+  async getPublicTrip(token) {
+    const response = await api.get(`/public/trips/${token}`);
+    return response.data;
+  }
 };
