@@ -1,23 +1,30 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from typing import List, Optional
+from sqlalchemy.orm import Session
 
-from app.seed.cities import CITIES
-from app.seed.activities import ACTIVITIES
+from app.database.connection import get_db
+from app.models.city import City
+from app.models.seed_activity import SeedActivity
 from app.schemas.activity import ActivityCreate
 
 router = APIRouter()
 
-@router.get("/cities")
-def get_cities():
-    return CITIES
+class SearchActivityResponse(ActivityCreate):
+    id: int
 
-@router.get("/activities/search", response_model=List[ActivityCreate])
+@router.get("/cities")
+def get_cities(db: Session = Depends(get_db)):
+    return db.query(City).all()
+
+@router.get("/activities/search", response_model=List[SearchActivityResponse])
 def search_activities(
     city: str = Query(..., description="City to filter activities by"),
-    q: Optional[str] = Query(None, description="Optional search query for activity name")
+    q: Optional[str] = Query(None, description="Optional search query for activity name"),
+    db: Session = Depends(get_db)
 ):
-    results = [a for a in ACTIVITIES if a["city"].lower() == city.lower()]
+    query = db.query(SeedActivity).join(City).filter(City.name.ilike(city))
+    
     if q:
-        results = [a for a in results if q.lower() in a["name"].lower()]
+        query = query.filter(SeedActivity.name.ilike(f"%{q}%"))
         
-    return results
+    return query.all()
