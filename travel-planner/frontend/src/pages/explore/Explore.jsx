@@ -39,7 +39,7 @@ export default function Explore() {
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto px-5 text-center text-white space-y-6">
-          <Eyebrow color="text-[#9af1f5] text-shadow">Where could we go?</Eyebrow>
+          <Eyebrow color="text-secondary text-shadow">Where could we go?</Eyebrow>
           <h1 className="display-headline text-5xl md:text-8xl font-bold tracking-tight text-shadow leading-none">
             EXPLORE THE WORLD
           </h1>
@@ -49,17 +49,17 @@ export default function Explore() {
 
           {/* Search Box */}
           <form onSubmit={handleSearch} className="relative max-w-xl mx-auto mt-8">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#76777d]" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search cities (Kyoto, Paris...), experiences..."
-              className="w-full pl-14 pr-32 py-4 bg-white/95 text-[#1c1c18] border border-transparent rounded-full shadow-2xl focus:outline-none focus:bg-white text-sm"
+              className="w-full pl-14 pr-32 py-4 bg-surface-container-lowest/95 text-on-background border border-transparent rounded-full shadow-2xl focus:outline-none focus:bg-surface-container-lowest text-sm"
             />
             <button
               type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-[#1c1c18] hover:bg-[#000000] text-white text-xs font-semibold rounded-full tracking-wide transition-all uppercase cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 bg-on-background hover:bg-[#000000] text-white text-xs font-semibold rounded-full tracking-wide transition-all uppercase cursor-pointer"
             >
               Search
             </button>
@@ -74,9 +74,9 @@ export default function Explore() {
           <div className="flex items-end justify-between">
             <div>
               <Eyebrow>Selected Hubs</Eyebrow>
-              <h2 className="text-2xl md:text-4xl font-bold text-[#1c1c18] tracking-tight">Popular Cities</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-on-background tracking-tight">Popular Cities</h2>
             </div>
-            <button onClick={() => navigate('/explore')} className="text-[#00696d] hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer">
+            <button onClick={() => navigate('/explore')} className="text-secondary hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer">
               All Destinations <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -86,7 +86,7 @@ export default function Explore() {
               <div 
                 key={city.id} 
                 onClick={() => navigate(`/explore/${city.name.toLowerCase()}`)}
-                className="relative min-w-[280px] h-[340px] rounded-3xl overflow-hidden cursor-pointer group shadow-sm border border-[#e6e3dc] snap-start"
+                className="relative min-w-[280px] h-[340px] rounded-3xl overflow-hidden cursor-pointer group shadow-sm border border-surface-container-high snap-start"
               >
                 <img 
                   src={city.photo} 
@@ -95,12 +95,12 @@ export default function Explore() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 text-white">
-                  <span className="px-2.5 py-0.5 bg-[#dbc3a8] text-[#261908] text-[9px] font-bold rounded-full uppercase tracking-wider block w-max mb-2">
+                  <span className="px-2.5 py-0.5 bg-surface-container text-on-background text-[9px] font-bold rounded-full uppercase tracking-wider block w-max mb-2">
                     {city.tag}
                   </span>
                   <h3 className="text-xl font-bold tracking-tight leading-tight">{city.name}</h3>
                   <p className="text-white/70 text-xs mt-1 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-[#9af1f5]" /> {city.region} · {city.tripCount}
+                    <MapPin className="w-3 h-3 text-secondary" /> {city.region} · {city.tripCount}
                   </p>
                 </div>
               </div>
@@ -113,31 +113,31 @@ export default function Explore() {
           <div className="flex items-end justify-between">
             <div>
               <Eyebrow>Experiences</Eyebrow>
-              <h2 className="text-2xl md:text-4xl font-bold text-[#1c1c18] tracking-tight">Curated Moments</h2>
+              <h2 className="text-2xl md:text-4xl font-bold text-on-background tracking-tight">Curated Moments</h2>
             </div>
-            <button onClick={() => navigate('/explore')} className="text-[#00696d] hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer">
+            <button onClick={() => navigate('/explore')} className="text-secondary hover:underline flex items-center gap-1 text-xs font-semibold cursor-pointer">
               All Activities <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {curatedActivities?.slice(0, 3).map(act => (
-              <div key={act.id} className="bg-white rounded-3xl border border-[#e6e3dc] overflow-hidden group hover:shadow-lg transition-shadow duration-500 flex flex-col justify-between">
+              <div key={act.id} className="bg-surface-container-lowest rounded-3xl border border-surface-container-high overflow-hidden group hover:shadow-lg transition-shadow duration-500 flex flex-col justify-between">
                 <div className="relative h-48 overflow-hidden">
                   <img src={act.image} alt={act.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <span className="absolute top-3 left-3 px-3 py-1 bg-white/90 text-[10px] font-semibold rounded-full text-[#1c1c18] uppercase tracking-wider">{act.category}</span>
+                  <span className="absolute top-3 left-3 px-3 py-1 bg-surface-container-lowest/90 text-[10px] font-semibold rounded-full text-on-background uppercase tracking-wider">{act.category}</span>
                 </div>
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-[#1c1c18] line-clamp-2">{act.title}</h3>
-                    <p className="text-xs text-[#76777d] mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" />{act.city}, {act.country}</p>
-                    <p className="text-xs text-[#46464c] mt-2 line-clamp-2 leading-relaxed">{act.description}</p>
+                    <h3 className="text-sm font-bold text-on-background line-clamp-2">{act.title}</h3>
+                    <p className="text-xs text-muted mt-1 flex items-center gap-1"><MapPin className="w-3 h-3" />{act.city}, {act.country}</p>
+                    <p className="text-xs text-muted mt-2 line-clamp-2 leading-relaxed">{act.description}</p>
                   </div>
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#e6e3dc]">
-                    <span className="text-xs font-bold text-[#00696d]">{act.cost}</span>
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-surface-container-high">
+                    <span className="text-xs font-bold text-secondary">{act.cost}</span>
                     <button 
                       onClick={() => navigate(`/explore?q=${encodeURIComponent(act.city)}`)}
-                      className="text-xs font-semibold text-[#1c1c18] hover:text-[#00696d] flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-semibold text-on-background hover:text-secondary flex items-center gap-1 cursor-pointer"
                     >
                       Details <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -152,11 +152,11 @@ export default function Explore() {
         <section className="space-y-6">
           <div>
             <Eyebrow>Travel Styles</Eyebrow>
-            <h2 className="text-2xl md:text-4xl font-bold text-[#1c1c18] tracking-tight">Intentional Journeys</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-on-background tracking-tight">Intentional Journeys</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {travelStyles.map((style, idx) => (
-              <div key={idx} className="relative h-[220px] rounded-3xl overflow-hidden group border border-[#e6e3dc] cursor-pointer">
+              <div key={idx} className="relative h-[220px] rounded-3xl overflow-hidden group border border-surface-container-high cursor-pointer">
                 <img src={style.img} alt={style.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 text-white">
@@ -169,11 +169,11 @@ export default function Explore() {
         </section>
 
         {/* Featured Stories */}
-        <section className="bg-[#f9f5ed] border border-[#e6e3dc] rounded-[36px] p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
+        <section className="bg-surface-container border border-surface-container-high rounded-[36px] p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center">
           <div className="md:w-1/2 space-y-4">
-            <Eyebrow color="text-[#00696d]">Featured Story</Eyebrow>
-            <h2 className="display-headline text-3xl md:text-5xl font-bold text-[#1c1c18]">The Quiet Japanese Autumn</h2>
-            <p className="text-sm text-[#46464c] font-serif leading-relaxed">
+            <Eyebrow color="text-secondary">Featured Story</Eyebrow>
+            <h2 className="display-headline text-3xl md:text-5xl font-bold text-on-background">The Quiet Japanese Autumn</h2>
+            <p className="text-sm text-muted font-serif leading-relaxed">
               "A 10-day contemplative journal through ancient Kyoto temples, misty Hakone hot springs, and Shinjuku neon lanes."
             </p>
             <Button variant="primary" icon={ArrowRight} iconPosition="right" onClick={() => navigate('/shared/tokyo-kyoto-2026')}>

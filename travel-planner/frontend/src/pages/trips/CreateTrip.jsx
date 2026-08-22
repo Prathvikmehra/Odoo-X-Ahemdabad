@@ -168,19 +168,19 @@ export default function CreateTrip() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fcf9f3] py-12 md:py-16">
+    <div className="min-h-screen bg-background py-12 md:py-16">
       <div className="max-w-[1440px] mx-auto px-5 md:px-16">
         
         {/* 1. Page Header */}
         <div className="max-w-3xl mb-10 md:mb-12">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-2 h-2 rounded-full bg-[#00696d]" />
-            <Eyebrow color="text-[#00696d]">NEW JOURNEY</Eyebrow>
+            <span className="w-2 h-2 rounded-full bg-secondary" />
+            <Eyebrow color="text-secondary">NEW JOURNEY</Eyebrow>
           </div>
-          <h1 className="display-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#1c1c18] mb-4">
+          <h1 className="display-headline text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-on-background mb-4">
             Plan your next adventure
           </h1>
-          <p className="text-base md:text-lg text-[#46464c] leading-relaxed font-light">
+          <p className="text-base md:text-lg text-muted leading-relaxed font-light">
             Draft your route, calibrate your financial blueprint, and weave curated cultural experiences into a timeless travel journal.
           </p>
         </div>
@@ -189,17 +189,17 @@ export default function CreateTrip() {
           
           {/* 2. Creation Form Column (Form Card) */}
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-[36px] p-8 md:p-12 border border-[#e6e3dc] shadow-sm">
+            <div className="bg-surface-container-lowest rounded-[36px] p-8 md:p-12 border border-surface-container-high shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-8">
                 
                 {/* Trip Name */}
                 <div>
-                  <label htmlFor="tripName" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
-                    Trip Name <span className="text-[#00696d]">*</span>
+                  <label htmlFor="tripName" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
+                    Trip Name <span className="text-secondary">*</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#76777d]">
-                      <Compass className="w-5 h-5 text-[#00696d]" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted">
+                      <Compass className="w-5 h-5 text-secondary" />
                     </div>
                     <input
                       id="tripName"
@@ -208,7 +208,7 @@ export default function CreateTrip() {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Autumn in Kyoto & Tokyo"
-                      className="w-full pl-12 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm md:text-base rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-[#76777d]/70"
+                      className="w-full pl-12 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm md:text-base rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-muted/70"
                     />
                   </div>
                 </div>
@@ -216,30 +216,30 @@ export default function CreateTrip() {
                 {/* 2-Column Grid: Dates */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="startDate" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
+                    <label htmlFor="startDate" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
                       Start Date
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#76777d]">
-                        <Calendar className="w-4 h-4 text-[#76777d]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted">
+                        <Calendar className="w-4 h-4 text-muted" />
                       </div>
                       <input
                         id="startDate"
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
-                        className="w-full pl-11 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
+                        className="w-full pl-11 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="endDate" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
+                    <label htmlFor="endDate" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
                       End Date
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#76777d]">
-                        <Calendar className="w-4 h-4 text-[#76777d]" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted">
+                        <Calendar className="w-4 h-4 text-muted" />
                       </div>
                       <input
                         id="endDate"
@@ -247,7 +247,7 @@ export default function CreateTrip() {
                         value={endDate}
                         min={startDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                        className="w-full pl-11 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
+                        className="w-full pl-11 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -255,12 +255,12 @@ export default function CreateTrip() {
 
                 {/* Destinations Input */}
                 <div>
-                  <label htmlFor="destinations" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
-                    Destinations <span className="text-xs font-normal text-[#76777d] lowercase">(comma-separated)</span>
+                  <label htmlFor="destinations" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
+                    Destinations <span className="text-xs font-normal text-muted lowercase">(comma-separated)</span>
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#76777d]">
-                      <MapPin className="w-5 h-5 text-[#00696d]" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted">
+                      <MapPin className="w-5 h-5 text-secondary" />
                     </div>
                     <input
                       id="destinations"
@@ -268,18 +268,18 @@ export default function CreateTrip() {
                       value={destinations}
                       onChange={(e) => setDestinations(e.target.value)}
                       placeholder="e.g. Tokyo, Hakone, Kyoto"
-                      className="w-full pl-12 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-[#76777d]/70"
+                      className="w-full pl-12 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-muted/70"
                     />
                   </div>
-                  <p className="text-xs text-[#76777d] mt-2 flex items-center gap-1.5">
-                    <Info className="w-3.5 h-3.5 text-[#00696d]" />
+                  <p className="text-xs text-muted mt-2 flex items-center gap-1.5">
+                    <Info className="w-3.5 h-3.5 text-secondary" />
                     <span>Each destination will automatically form an editable section in your itinerary.</span>
                   </p>
                 </div>
 
                 {/* Description / Journal Notes Textarea */}
                 <div>
-                  <label htmlFor="notes" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
+                  <label htmlFor="notes" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
                     Journal Vision & Exploration Notes
                   </label>
                   <textarea
@@ -288,18 +288,18 @@ export default function CreateTrip() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Describe your intent, theme (e.g. brutalist architecture, quiet tea gardens), or key wishes for this expedition..."
-                    className="w-full p-4 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm rounded-2xl border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-[#76777d]/70 resize-y"
+                    className="w-full p-4 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm rounded-2xl border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-muted/70 resize-y"
                   />
                 </div>
 
                 {/* Total Budget */}
                 <div>
-                  <label htmlFor="budget" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18] mb-2.5">
+                  <label htmlFor="budget" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background mb-2.5">
                     Total Estimated Budget (₹ INR)
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#1c1c18] font-bold">
-                      <IndianRupee className="w-4 h-4 text-[#00696d]" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-on-background font-bold">
+                      <IndianRupee className="w-4 h-4 text-secondary" />
                     </div>
                     <input
                       id="budget"
@@ -309,7 +309,7 @@ export default function CreateTrip() {
                       value={totalBudget}
                       onChange={(e) => setTotalBudget(e.target.value)}
                       placeholder="120000"
-                      className="w-full pl-11 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-sm font-medium rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
+                      className="w-full pl-11 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-sm font-medium rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none"
                     />
                   </div>
                 </div>
@@ -317,14 +317,14 @@ export default function CreateTrip() {
                 {/* Cover Photo URL & Presets */}
                 <div>
                   <div className="flex items-center justify-between mb-2.5">
-                    <label htmlFor="coverImage" className="block text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18]">
+                    <label htmlFor="coverImage" className="block text-xs font-semibold uppercase tracking-[0.1em] text-on-background">
                       Cover Photo URL
                     </label>
-                    <span className="text-[11px] text-[#76777d]">Unsplash or high-res URL</span>
+                    <span className="text-[11px] text-muted">Unsplash or high-res URL</span>
                   </div>
                   <div className="relative mb-3">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#76777d]">
-                      <ImageIcon className="w-4 h-4 text-[#76777d]" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted">
+                      <ImageIcon className="w-4 h-4 text-muted" />
                     </div>
                     <input
                       id="coverImage"
@@ -332,13 +332,13 @@ export default function CreateTrip() {
                       value={coverImage}
                       onChange={(e) => setCoverImage(e.target.value)}
                       placeholder="https://images.unsplash.com/..."
-                      className="w-full pl-11 pr-5 py-3.5 bg-[#fcf9f3]/50 hover:bg-[#fcf9f3] focus:bg-white text-[#1c1c18] text-xs md:text-sm rounded-full border border-[#e6e3dc] focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-[#76777d]/70 font-mono"
+                      className="w-full pl-11 pr-5 py-3.5 bg-background/50 hover:bg-background focus:bg-surface-container-lowest text-on-background text-xs md:text-sm rounded-full border border-surface-container-high focus:border-[#1c1c18] focus:ring-1 focus:ring-[#1c1c18] transition-all outline-none placeholder:text-muted/70 font-mono"
                     />
                   </div>
 
                   {/* Preset quick selection */}
                   <div>
-                    <span className="text-[11px] font-medium text-[#76777d] mb-2 block">Quick Curated Presets:</span>
+                    <span className="text-[11px] font-medium text-muted mb-2 block">Quick Curated Presets:</span>
                     <div className="flex flex-wrap gap-2">
                       {PRESET_COVERS.map((preset) => (
                         <button
@@ -347,8 +347,8 @@ export default function CreateTrip() {
                           onClick={() => setCoverImage(preset.url)}
                           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                             coverImage === preset.url
-                              ? "bg-[#00696d] text-white shadow-xs"
-                              : "bg-[#f9f5ed] border border-[#e6e3dc] text-[#46464c] hover:border-[#1c1c18] hover:text-[#1c1c18]"
+                              ? "bg-secondary text-white shadow-xs"
+                              : "bg-surface-container border border-surface-container-high text-muted hover:border-[#1c1c18] hover:text-on-background"
                           }`}
                         >
                           {preset.name}
@@ -362,15 +362,15 @@ export default function CreateTrip() {
                 {coverImage && (
                   <div className="pt-2">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[#1c1c18]">
+                      <span className="text-xs font-semibold uppercase tracking-[0.1em] text-on-background">
                         Live Journal Cover Preview
                       </span>
-                      <span className="text-[11px] text-[#00696d] font-medium flex items-center gap-1">
+                      <span className="text-[11px] text-secondary font-medium flex items-center gap-1">
                         <Sparkles className="w-3.5 h-3.5" /> Dynamic
                       </span>
                     </div>
 
-                    <div className="relative w-full h-[200px] rounded-2xl overflow-hidden shadow-md border border-[#e6e3dc] group">
+                    <div className="relative w-full h-[200px] rounded-2xl overflow-hidden shadow-md border border-surface-container-high group">
                       <img
                         src={coverImage}
                         alt="Trip Cover Preview"
@@ -383,7 +383,7 @@ export default function CreateTrip() {
                       
                       <div className="absolute bottom-4 left-5 right-5 text-white">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-[10px] uppercase font-semibold tracking-wider text-[#9af1f5] border border-white/20">
+                          <span className="px-2.5 py-0.5 rounded-full bg-surface-container-lowest/20 backdrop-blur-md text-[10px] uppercase font-semibold tracking-wider text-secondary border border-white/20">
                             Upcoming Expedition
                           </span>
                           {destinations && (
@@ -426,42 +426,42 @@ export default function CreateTrip() {
           <div className="lg:col-span-4 space-y-6">
             
             {/* Editorial Quick Guide Card */}
-            <div className="bg-[#f9f5ed] rounded-[32px] p-7 md:p-8 border border-[#e6e3dc] space-y-5">
-              <div className="w-10 h-10 rounded-full bg-[#1c1c18] text-[#9af1f5] flex items-center justify-center">
+            <div className="bg-surface-container rounded-[32px] p-7 md:p-8 border border-surface-container-high space-y-5">
+              <div className="w-10 h-10 rounded-full bg-[#1c1c18] text-secondary flex items-center justify-center">
                 <Layers className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-[#1c1c18] tracking-tight mb-2">
+                <h3 className="text-lg font-bold text-on-background tracking-tight mb-2">
                   The GlobeTrotter Way
                 </h3>
-                <p className="text-xs md:text-sm text-[#46464c] leading-relaxed">
+                <p className="text-xs md:text-sm text-muted leading-relaxed">
                   Every journey created becomes an editable multi-destination chapter book. You can attach day-by-day itineraries, track shared split expenses, and fork community insights.
                 </p>
               </div>
 
               <div className="space-y-3 pt-2 hairline-t">
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#e0fbfb] text-[#00696d] flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
                     1
                   </div>
-                  <p className="text-xs text-[#46464c]">
-                    <strong className="text-[#1c1c18]">Multi-stop structure:</strong> Separate cities into distinct chapters with dedicated notes and budgets.
+                  <p className="text-xs text-muted">
+                    <strong className="text-on-background">Multi-stop structure:</strong> Separate cities into distinct chapters with dedicated notes and budgets.
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#e0fbfb] text-[#00696d] flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
                     2
                   </div>
-                  <p className="text-xs text-[#46464c]">
-                    <strong className="text-[#1c1c18]">Curated experiences:</strong> Pick from suggested moments below to pre-fill your schedule.
+                  <p className="text-xs text-muted">
+                    <strong className="text-on-background">Curated experiences:</strong> Pick from suggested moments below to pre-fill your schedule.
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#e0fbfb] text-[#00696d] flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
                     3
                   </div>
-                  <p className="text-xs text-[#46464c]">
-                    <strong className="text-[#1c1c18]">Real-time balance:</strong> Log expenses on the go and track actuals against your ₹{Number(totalBudget || 0).toLocaleString('en-IN')} target.
+                  <p className="text-xs text-muted">
+                    <strong className="text-on-background">Real-time balance:</strong> Log expenses on the go and track actuals against your ₹{Number(totalBudget || 0).toLocaleString('en-IN')} target.
                   </p>
                 </div>
               </div>
@@ -469,20 +469,20 @@ export default function CreateTrip() {
 
             {/* Selected Experiences Counter Card */}
             {selectedActivities.length > 0 && (
-              <div className="bg-white rounded-[28px] p-6 border border-[#00696d]/30 shadow-sm bg-gradient-to-br from-white to-[#e0fbfb]/30">
+              <div className="bg-surface-container-lowest rounded-[28px] p-6 border border-secondary/30 shadow-sm bg-gradient-to-br from-white to-[#e0fbfb]/30">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-semibold uppercase tracking-[0.1em] text-[#00696d]">
+                  <span className="text-xs font-semibold uppercase tracking-[0.1em] text-secondary">
                     Selected Experiences
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#00696d] text-white text-xs font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-secondary text-white text-xs font-bold">
                     {selectedActivities.length}
                   </span>
                 </div>
                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                   {selectedActivities.map((act) => (
-                    <div key={act.id} className="flex items-center justify-between text-xs py-1.5 border-b border-[#e6e3dc]/60">
-                      <span className="font-medium text-[#1c1c18] truncate max-w-[180px]">{act.title}</span>
-                      <span className="text-[#00696d] font-semibold">{act.cost}</span>
+                    <div key={act.id} className="flex items-center justify-between text-xs py-1.5 border-b border-surface-container-high/60">
+                      <span className="font-medium text-on-background truncate max-w-[180px]">{act.title}</span>
+                      <span className="text-secondary font-semibold">{act.cost}</span>
                     </div>
                   ))}
                 </div>
@@ -499,18 +499,18 @@ export default function CreateTrip() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 rounded-full bg-[#00696d]" />
-                <Eyebrow color="text-[#00696d]">SUGGESTED EXPERIENCES</Eyebrow>
+                <span className="w-2 h-2 rounded-full bg-secondary" />
+                <Eyebrow color="text-secondary">SUGGESTED EXPERIENCES</Eyebrow>
               </div>
-              <h2 className="display-headline text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-[#1c1c18]">
+              <h2 className="display-headline text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-on-background">
                 Curated moments to inspire your itinerary
               </h2>
-              <p className="text-sm md:text-base text-[#46464c] mt-1 font-light">
+              <p className="text-sm md:text-base text-muted mt-1 font-light">
                 Handpicked culinary stops, historical walks, and scenic trails. Click &ldquo;+ Add&rdquo; to integrate them directly into your new trip plan.
               </p>
             </div>
             
-            <div className="text-xs font-medium text-[#76777d] shrink-0">
+            <div className="text-xs font-medium text-muted shrink-0">
               Showing {curatedActivities.length} editorial selections
             </div>
           </div>
@@ -523,8 +523,8 @@ export default function CreateTrip() {
               return (
                 <div
                   key={activity.id}
-                  className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 flex flex-col group hover:shadow-xl ${
-                    isSelected ? "border-[#00696d] ring-2 ring-[#00696d]/20" : "border-[#e6e3dc]"
+                  className={`bg-surface-container-lowest rounded-2xl overflow-hidden border transition-all duration-300 flex flex-col group hover:shadow-xl ${
+                    isSelected ? "border-secondary ring-2 ring-[#00696d]/20" : "border-surface-container-high"
                   }`}
                 >
                   {/* Photo with hover zoom */}
@@ -538,7 +538,7 @@ export default function CreateTrip() {
                     
                     {/* Top tags */}
                     <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-white/90 backdrop-blur-md text-[#1c1c18] shadow-xs">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-surface-container-lowest/90 backdrop-blur-md text-on-background shadow-xs">
                         {activity.category}
                       </span>
                       {activity.rating && (
@@ -551,7 +551,7 @@ export default function CreateTrip() {
 
                     {/* Bottom overlay in image */}
                     <div className="absolute bottom-3 left-3 right-3 text-white">
-                      <div className="flex items-center gap-2 text-xs text-[#9af1f5] font-medium mb-1">
+                      <div className="flex items-center gap-2 text-xs text-secondary font-medium mb-1">
                         <MapPin className="w-3.5 h-3.5" />
                         <span>{activity.city}, {activity.country}</span>
                       </div>
@@ -564,17 +564,17 @@ export default function CreateTrip() {
                   {/* Card Content */}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      <p className="text-xs text-[#46464c] line-clamp-2 leading-relaxed font-light mb-3">
+                      <p className="text-xs text-muted line-clamp-2 leading-relaxed font-light mb-3">
                         {activity.description}
                       </p>
 
-                      <div className="flex items-center gap-3 text-xs text-[#76777d] pt-1">
+                      <div className="flex items-center gap-3 text-xs text-muted pt-1">
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5 text-[#00696d]" />
+                          <Clock className="w-3.5 h-3.5 text-secondary" />
                           <span>{activity.duration}</span>
                         </span>
                         <span>&bull;</span>
-                        <span className="font-semibold text-[#1c1c18]">
+                        <span className="font-semibold text-on-background">
                           {activity.cost}
                         </span>
                       </div>
@@ -584,7 +584,7 @@ export default function CreateTrip() {
                     <div className="pt-3 hairline-t flex items-center justify-between gap-2">
                       <div className="flex flex-wrap gap-1">
                         {activity.tags?.slice(0, 2).map(tag => (
-                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-md bg-[#f6f2e9] text-[#76777d]">
+                          <span key={tag} className="text-[10px] px-2 py-0.5 rounded-md bg-[#f6f2e9] text-muted">
                             #{tag}
                           </span>
                         ))}
@@ -595,7 +595,7 @@ export default function CreateTrip() {
                         variant={isSelected ? "teal" : "ghost"}
                         icon={isSelected ? Check : Plus}
                         onClick={() => handleToggleActivity(activity)}
-                        className={isSelected ? "shadow-xs" : "hover:bg-[#00696d]/10 hover:text-[#00696d]"}
+                        className={isSelected ? "shadow-xs" : "hover:bg-secondary/10 hover:text-secondary"}
                       >
                         {isSelected ? "Added" : "Add"}
                       </Button>

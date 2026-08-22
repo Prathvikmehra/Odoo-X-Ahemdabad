@@ -26,7 +26,7 @@ export default function TripList() {
   const completed = filtered.filter(t => t.status === 'completed');
 
   const TripCard = ({ trip }) => (
-    <div className="bg-white rounded-3xl border border-[#e6e3dc] overflow-hidden flex flex-col md:flex-row gap-0 group hover:shadow-lg transition-shadow duration-500">
+    <div className="bg-surface-container-lowest rounded-3xl border border-surface-container-high overflow-hidden flex flex-col md:flex-row gap-0 group hover:shadow-lg transition-shadow duration-500">
       <div className="md:w-52 h-44 md:h-auto overflow-hidden flex-shrink-0">
         <img
           src={trip.coverImage}
@@ -38,18 +38,18 @@ export default function TripList() {
         <div>
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h3 className="text-lg font-bold text-[#1c1c18] tracking-tight">{trip.title}</h3>
-              <p className="text-xs text-[#46464c] mt-0.5 line-clamp-1">{trip.subtitle}</p>
+              <h3 className="text-lg font-bold text-on-background tracking-tight">{trip.title}</h3>
+              <p className="text-xs text-muted mt-0.5 line-clamp-1">{trip.subtitle}</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider flex-shrink-0 ${
-              trip.status === 'ongoing' ? 'bg-[#9af1f5]/30 text-[#00696d]' :
+              trip.status === 'ongoing' ? 'bg-[#9af1f5]/30 text-secondary' :
               trip.status === 'upcoming' ? 'bg-[#dbc3a8]/30 text-[#261908]' :
-              'bg-[#e6e3dc] text-[#46464c]'
+              'bg-[#e6e3dc] text-muted'
             }`}>
               {trip.status}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-[#76777d]">
+          <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted">
             <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{trip.startDate} → {trip.endDate}</span>
             <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{trip.destinations?.length || 0} destinations</span>
             {trip.collaborators?.length > 0 && (
@@ -58,22 +58,22 @@ export default function TripList() {
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
             {trip.destinations?.slice(0, 4).map((d, i) => (
-              <span key={i} className="px-2.5 py-0.5 bg-[#f6f2e9] text-[#46464c] text-[10px] font-medium rounded-full">{d}</span>
+              <span key={i} className="px-2.5 py-0.5 bg-surface-container-high text-muted text-[10px] font-medium rounded-full">{d}</span>
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#e6e3dc]">
-          <div className="text-xs text-[#76777d]">
-            <span className="font-semibold text-[#1c1c18]">₹{trip.spentBudget?.toLocaleString('en-IN')}</span> / ₹{trip.totalBudget?.toLocaleString('en-IN')}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-surface-container-high">
+          <div className="text-xs text-muted">
+            <span className="font-semibold text-on-background">₹{trip.spentBudget?.toLocaleString('en-IN')}</span> / ₹{trip.totalBudget?.toLocaleString('en-IN')}
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => navigate(`/trips/${trip.id}`)} className="p-2 rounded-full hover:bg-[#f6f2e9] text-[#46464c] hover:text-[#1c1c18] transition-colors cursor-pointer" title="View">
+            <button onClick={() => navigate(`/trips/${trip.id}`)} className="p-2 rounded-full hover:bg-surface-container-high text-muted hover:text-on-background transition-colors cursor-pointer" title="View">
               <Eye className="w-4 h-4" />
             </button>
-            <button onClick={() => navigate(`/trips/${trip.id}/itinerary-builder`)} className="p-2 rounded-full hover:bg-[#f6f2e9] text-[#46464c] hover:text-[#1c1c18] transition-colors cursor-pointer" title="Edit">
+            <button onClick={() => navigate(`/trips/${trip.id}/itinerary-builder`)} className="p-2 rounded-full hover:bg-surface-container-high text-muted hover:text-on-background transition-colors cursor-pointer" title="Edit">
               <Pencil className="w-4 h-4" />
             </button>
-            <button onClick={() => deleteTrip(trip.id)} className="p-2 rounded-full hover:bg-red-50 text-[#46464c] hover:text-red-600 transition-colors cursor-pointer" title="Delete">
+            <button onClick={() => deleteTrip(trip.id)} className="p-2 rounded-full hover:bg-red-50 text-muted hover:text-red-600 transition-colors cursor-pointer" title="Delete">
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
@@ -85,11 +85,11 @@ export default function TripList() {
   const Section = ({ title, items, emptyMessage }) => (
     <div className="mb-10">
       <div className="flex items-center gap-3 mb-4">
-        <Eyebrow color="text-[#00696d]">{title}</Eyebrow>
-        <span className="px-2 py-0.5 bg-[#9af1f5]/20 text-[#00696d] text-[10px] font-semibold rounded-full">{items.length}</span>
+        <Eyebrow color="text-secondary">{title}</Eyebrow>
+        <span className="px-2 py-0.5 bg-secondary/20 text-secondary text-[10px] font-semibold rounded-full">{items.length}</span>
       </div>
       {items.length === 0 ? (
-        <div className="bg-[#f6f2e9] rounded-2xl p-8 text-center text-sm text-[#76777d]">{emptyMessage}</div>
+        <div className="bg-surface-container-high rounded-2xl p-8 text-center text-sm text-muted">{emptyMessage}</div>
       ) : (
         <div className="space-y-4">
           {items.map(trip => <TripCard key={trip.id} trip={trip} />)}
@@ -102,8 +102,8 @@ export default function TripList() {
     <div className="max-w-[1440px] mx-auto px-5 md:px-16 py-10">
       <div className="mb-8">
         <Eyebrow className="mb-2">Your Collection</Eyebrow>
-        <h1 className="display-headline text-4xl md:text-5xl font-bold text-[#1c1c18]">My Journeys</h1>
-        <p className="text-sm text-[#46464c] mt-2 max-w-lg">Every trip planned, every destination explored — your complete travel library.</p>
+        <h1 className="display-headline text-4xl md:text-5xl font-bold text-on-background">My Journeys</h1>
+        <p className="text-sm text-muted mt-2 max-w-lg">Every trip planned, every destination explored — your complete travel library.</p>
       </div>
 
       <HeaderFilterBar

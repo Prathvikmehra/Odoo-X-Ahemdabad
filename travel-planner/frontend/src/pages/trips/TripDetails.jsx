@@ -33,12 +33,12 @@ export default function TripDetails() {
   return (
     <div className="max-w-[1440px] mx-auto px-5 md:px-16 py-10 space-y-12">
       {/* Back link */}
-      <button onClick={() => navigate('/trips')} className="text-xs font-semibold text-[#76777d] hover:text-[#1c1c18] transition-colors cursor-pointer flex items-center gap-1">
+      <button onClick={() => navigate('/trips')} className="text-xs font-semibold text-muted hover:text-on-background transition-colors cursor-pointer flex items-center gap-1">
         ← Back to Trips
       </button>
 
       {/* Hero Overview Header */}
-      <div className="relative w-full h-[380px] rounded-[36px] overflow-hidden border border-[#e6e3dc] shadow-xs">
+      <div className="relative w-full h-[380px] rounded-[36px] overflow-hidden border border-surface-container-high shadow-xs">
         <img src={trip.coverImage} alt={trip.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
         
@@ -59,13 +59,13 @@ export default function TripDetails() {
               <Button variant="teal" size="sm" icon={Eye}>Itinerary</Button>
             </Link>
             <Link to={`/trips/${trip.id}/itinerary-builder`}>
-              <Button variant="secondary" className="bg-white/95 text-[#1c1c18] border-transparent hover:bg-white" size="sm" icon={Edit3}>Edit Stops</Button>
+              <Button variant="secondary" className="bg-surface-container-lowest/95 text-on-background border-transparent hover:bg-surface-container-lowest" size="sm" icon={Edit3}>Edit Stops</Button>
             </Link>
             <Link to={`/trips/${trip.id}/budget`}>
-              <Button variant="secondary" className="bg-white/95 text-[#1c1c18] border-transparent hover:bg-white" size="sm" icon={Wallet}>Expenses</Button>
+              <Button variant="secondary" className="bg-surface-container-lowest/95 text-on-background border-transparent hover:bg-surface-container-lowest" size="sm" icon={Wallet}>Expenses</Button>
             </Link>
             <Link to={`/trips/${trip.id}/share`}>
-              <Button variant="secondary" className="bg-white/95 text-[#1c1c18] border-transparent hover:bg-white" size="sm" icon={Share2}>Share</Button>
+              <Button variant="secondary" className="bg-surface-container-lowest/95 text-on-background border-transparent hover:bg-surface-container-lowest" size="sm" icon={Share2}>Share</Button>
             </Link>
           </div>
         </div>
@@ -77,8 +77,8 @@ export default function TripDetails() {
         <div className="lg:col-span-2 space-y-10">
           
           {/* Journey Route Map / Timeline */}
-          <div className="bg-white border border-[#e6e3dc] rounded-3xl p-6 md:p-8 space-y-6">
-            <Eyebrow color="text-[#00696d]">Journey Route</Eyebrow>
+          <div className="bg-surface-container-lowest border border-surface-container-high rounded-3xl p-6 md:p-8 space-y-6">
+            <Eyebrow color="text-secondary">Journey Route</Eyebrow>
             
             <div className="relative pl-8 space-y-8">
               {/* Vertical Route Line */}
@@ -86,20 +86,20 @@ export default function TripDetails() {
 
               {trip.sections?.map((stop, idx) => (
                 <div key={stop.id} className="relative flex items-start gap-4">
-                  <div className="absolute -left-10 top-0.5 w-5 h-5 rounded-full border-2 border-[#00696d] bg-white flex items-center justify-center">
+                  <div className="absolute -left-10 top-0.5 w-5 h-5 rounded-full border-2 border-[#00696d] bg-surface-container-lowest flex items-center justify-center">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#00696d]" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold text-[#76777d] uppercase tracking-wider block">Stop {String(idx + 1).padStart(2, '0')}</span>
-                    <h3 className="text-base font-bold text-[#1c1c18] mt-0.5">{stop.city}</h3>
-                    <p className="text-xs text-[#46464c]">{stop.dates} · Allocated: ₹{stop.allocatedBudget?.toLocaleString('en-IN')}</p>
-                    {stop.notes && <p className="text-xs text-[#76777d] italic mt-1 font-serif">"{stop.notes}"</p>}
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider block">Stop {String(idx + 1).padStart(2, '0')}</span>
+                    <h3 className="text-base font-bold text-on-background mt-0.5">{stop.city}</h3>
+                    <p className="text-xs text-muted">{stop.dates} · Allocated: ₹{stop.allocatedBudget?.toLocaleString('en-IN')}</p>
+                    {stop.notes && <p className="text-xs text-muted italic mt-1 font-serif">"{stop.notes}"</p>}
                   </div>
                 </div>
               ))}
 
               {(!trip.sections || trip.sections.length === 0) && (
-                <p className="text-sm text-[#76777d] italic">Your journey is still a blank page. Start adding city stops.</p>
+                <p className="text-sm text-muted italic">Your journey is still a blank page. Start adding city stops.</p>
               )}
             </div>
 
@@ -109,22 +109,22 @@ export default function TripDetails() {
           </div>
 
           {/* Passport Stamps Section */}
-          <div className="bg-white border border-[#e6e3dc] rounded-3xl p-6 md:p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-[#e6e3dc] pb-4">
+          <div className="bg-surface-container-lowest border border-surface-container-high rounded-3xl p-6 md:p-8 space-y-6">
+            <div className="flex items-center justify-between border-b border-surface-container-high pb-4">
               <div>
-                <Eyebrow color="text-[#00696d]">Traveler Credentials</Eyebrow>
-                <h2 className="text-lg font-bold text-[#1c1c18] mt-1">Visa Stamps</h2>
+                <Eyebrow color="text-secondary">Traveler Credentials</Eyebrow>
+                <h2 className="text-lg font-bold text-on-background mt-1">Visa Stamps</h2>
               </div>
               <Compass className="w-6 h-6 text-[#c6c6cc]" />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
               {trip.destinations?.map((dest, i) => (
-                <div key={i} className="aspect-square rounded-full border-4 border-dashed border-[#dbc3a8] p-3 flex flex-col items-center justify-center text-center relative overflow-hidden bg-[#fbf9f4]/40 hover:scale-105 transition-transform">
+                <div key={i} className="aspect-square rounded-full border-4 border-dashed border-[#dbc3a8] p-3 flex flex-col items-center justify-center text-center relative overflow-hidden bg-background/40 hover:scale-105 transition-transform">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5 text-4xl font-extrabold uppercase font-serif">PASSPORT</div>
                   <span className="text-[10px] font-bold text-[#dbc3a8] uppercase tracking-[0.14em]">STAMP APPROVED</span>
                   <p className="text-sm font-extrabold text-[#261908] tracking-tight leading-tight uppercase font-serif my-1">{dest}</p>
-                  <span className="text-[8px] text-[#76777d] uppercase">{trip.startDate.split('-')[0]}</span>
+                  <span className="text-[8px] text-muted uppercase">{trip.startDate.split('-')[0]}</span>
                 </div>
               ))}
             </div>
@@ -136,31 +136,31 @@ export default function TripDetails() {
         <div className="space-y-6">
           
           {/* Quick Stats overview */}
-          <div className="bg-white border border-[#e6e3dc] rounded-3xl p-6 space-y-6">
-            <h3 className="text-base font-bold text-[#1c1c18]">Journey in Numbers</h3>
+          <div className="bg-surface-container-lowest border border-surface-container-high rounded-3xl p-6 space-y-6">
+            <h3 className="text-base font-bold text-on-background">Journey in Numbers</h3>
             
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-[#fcf9f3]">
-                <span className="text-xs text-[#76777d]">Total Duration</span>
-                <span className="text-sm font-semibold text-[#1c1c18]">{totalDays} Days</span>
+                <span className="text-xs text-muted">Total Duration</span>
+                <span className="text-sm font-semibold text-on-background">{totalDays} Days</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-[#fcf9f3]">
-                <span className="text-xs text-[#76777d]">Stops Planned</span>
-                <span className="text-sm font-semibold text-[#1c1c18]">{trip.sections?.length || 0} Cities</span>
+                <span className="text-xs text-muted">Stops Planned</span>
+                <span className="text-sm font-semibold text-on-background">{trip.sections?.length || 0} Cities</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-[#fcf9f3]">
-                <span className="text-xs text-[#76777d]">Total Budget</span>
-                <span className="text-sm font-semibold text-[#1c1c18]">₹{trip.totalBudget?.toLocaleString('en-IN')}</span>
+                <span className="text-xs text-muted">Total Budget</span>
+                <span className="text-sm font-semibold text-on-background">₹{trip.totalBudget?.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between items-center py-2">
-                <span className="text-xs text-[#76777d]">Spent to Date</span>
-                <span className="text-sm font-semibold text-[#00696d]">₹{trip.spentBudget?.toLocaleString('en-IN')}</span>
+                <span className="text-xs text-muted">Spent to Date</span>
+                <span className="text-sm font-semibold text-secondary">₹{trip.spentBudget?.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             {/* Spent progress bar */}
             <div>
-              <div className="flex justify-between text-[10px] font-semibold text-[#76777d] mb-1.5">
+              <div className="flex justify-between text-[10px] font-semibold text-muted mb-1.5">
                 <span>BUDGET UTILIZED</span>
                 <span>{spentPct}%</span>
               </div>
@@ -175,8 +175,8 @@ export default function TripDetails() {
           </div>
 
           {/* Danger zone actions */}
-          <div className="bg-[#f9f5ed] border border-[#e6e3dc] rounded-3xl p-5 flex items-center justify-between">
-            <span className="text-xs text-[#46464c] font-medium">Remove expedition</span>
+          <div className="bg-surface-container border border-surface-container-high rounded-3xl p-5 flex items-center justify-between">
+            <span className="text-xs text-muted font-medium">Remove expedition</span>
             <button onClick={handleDelete} className="p-2 rounded-full hover:bg-red-50 text-red-600 transition-colors cursor-pointer" title="Delete Trip">
               <Trash2 className="w-4 h-4" />
             </button>

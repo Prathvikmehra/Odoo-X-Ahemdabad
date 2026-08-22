@@ -21,11 +21,11 @@ export function Button({
   };
 
   const variantStyles = {
-    primary: "bg-[#1c1c18] text-[#fcf9f3] hover:bg-[#000000] hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md focus:ring-[#1c1c18]",
-    secondary: "bg-transparent border border-[#1c1c18] text-[#1c1c18] hover:bg-[#1c1c18] hover:text-[#fcf9f3] hover:scale-[1.02] active:scale-[0.98] focus:ring-[#1c1c18]",
-    teal: "bg-[#00696d] text-white hover:bg-[#005356] hover:scale-[1.02] active:scale-[0.98] focus:ring-[#00696d] shadow-sm",
-    tealLight: "bg-[#9af1f5]/25 text-[#00696d] border border-[#00696d]/20 hover:bg-[#9af1f5]/40 active:scale-[0.98]",
-    ghost: "bg-transparent text-[#46464c] hover:text-[#1c1c18] hover:bg-[#f6f2e9] active:scale-[0.98]",
+    primary: "bg-primary text-on-primary hover:bg-[#e0553a] hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md focus:ring-primary",
+    secondary: "bg-transparent border border-on-background text-on-background hover:bg-on-background hover:text-background hover:scale-[1.02] active:scale-[0.98] focus:ring-on-background",
+    teal: "bg-secondary text-on-secondary hover:bg-[#126b68] hover:scale-[1.02] active:scale-[0.98] focus:ring-secondary shadow-sm",
+    tealLight: "bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 active:scale-[0.98]",
+    ghost: "bg-transparent text-muted hover:text-on-background hover:bg-surface-container-high active:scale-[0.98]",
     danger: "bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white"
   };
 
@@ -44,7 +44,7 @@ export function Button({
   );
 }
 
-export function Eyebrow({ children, className = '', color = 'text-[#76777d]' }) {
+export function Eyebrow({ children, className = '', color = 'text-muted' }) {
   return (
     <span className={`text-[11px] font-semibold tracking-[0.12em] uppercase block select-none ${color} ${className}`}>
       {children}
@@ -59,13 +59,13 @@ export function Chip({ children, active = false, onClick, className = '', count 
       onClick={onClick}
       className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 select-none ${
         active
-          ? "bg-[#1c1c18] text-[#fcf9f3] shadow-sm"
-          : "bg-white/80 border border-[#e6e3dc] text-[#46464c] hover:border-[#1c1c18] hover:text-[#1c1c18]"
+          ? "bg-on-background text-background shadow-sm"
+          : "bg-white/80 border border-surface-container-high text-muted hover:border-on-background hover:text-on-background"
       } ${className}`}
     >
       <span>{children}</span>
       {count !== undefined && (
-        <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${active ? "bg-white/20 text-white" : "bg-[#f6f2e9] text-[#76777d]"}`}>
+        <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${active ? "bg-white/20 text-white" : "bg-surface-container-high text-muted"}`}>
           {count}
         </span>
       )}
