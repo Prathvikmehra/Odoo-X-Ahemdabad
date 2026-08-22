@@ -2,9 +2,11 @@ fastapi
 uvicorn
 sqlalchemy
 passlib[bcrypt]
+bcrypt==4.0.1
 PyJWT
 pydantic-settings
 alembic
 pytest
-httpx
+httpx2
+pytest-httpx
 psycopg2-binary
