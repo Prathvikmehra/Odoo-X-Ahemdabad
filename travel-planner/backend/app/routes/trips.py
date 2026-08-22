@@ -170,7 +170,34 @@ def get_budget(
     return calculate_trip_budget(db, trip.id)
 
 
-@router.post("/{trip_id}/share")
-def share_trip(trip_id: int):
-    return {"msg": "share_trip"}
+import secrets
+from app.schemas.public import ShareTripOut
+
+
+@router.post("/{trip_id}/share", response_model=ShareTripOut, status_code=status.HTTP_200_OK)
+def share_trip(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == current_user.id).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found",
+        )
+
+    if not trip.share_token:
+        trip.share_token = secrets.token_urlsafe(16)
+    trip.is_public = True
+
+    db.commit()
+    db.refresh(trip)
+
+    return ShareTripOut(
+        share_token=trip.share_token,
+        share_url=f"/public/trips/{trip.share_token}",
+        is_public=trip.is_public,
+    )
+
 

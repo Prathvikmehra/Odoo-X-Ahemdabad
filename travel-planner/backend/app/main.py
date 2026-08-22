@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.database.base import Base
+from app.database.connection import engine
 import app.models  # noqa: F401
 from app.routes import auth, trips, stops, activities, expenses, public, search
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Travel Planner API")
 
