@@ -5,4 +5,6 @@ passlib[bcrypt]
 PyJWT
 pydantic-settings
 alembic
+pytest
+httpx
 psycopg2-binary

@@ -1,2 +1,1 @@
-from app.models.user import User
-from app.models.trip import Trip
+# Models are registered via app.database.base
