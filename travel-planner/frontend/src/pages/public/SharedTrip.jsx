@@ -13,7 +13,7 @@ export default function SharedTrip() {
     const fetchSharedTrip = async () => {
       try {
         // Public endpoint — no auth token required
-        const res = await axios.get(`/api/trips/shared/${token}`);
+        const res = await axios.get(`/api/public/trips/${token}`);
         setTrip(res.data);
       } catch (err) {
         if (err.response?.status === 404) {
