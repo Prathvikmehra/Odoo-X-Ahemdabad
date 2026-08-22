@@ -1,1 +1,8 @@
-# Models are registered via app.database.base
+from app.models.user import User
+from app.models.trip import Trip
+from app.models.trip_stop import TripStop
+from app.models.activity import Activity
+from app.models.expense import Expense
+
+__all__ = ["User", "Trip", "TripStop", "Activity", "Expense"]
+
