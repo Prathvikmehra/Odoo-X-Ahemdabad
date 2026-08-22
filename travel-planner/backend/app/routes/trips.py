@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from typing import List
 from sqlalchemy.orm import Session
+import secrets
 
 from app.database.connection import get_db
 from app.models.user import User
 from app.models.trip import Trip
+from app.models.expense import Expense
 from app.schemas.trip import TripCreate, TripUpdate, TripOut
+from app.schemas.expense import ExpenseCreate, ExpenseOut, BudgetSummaryOut
+from app.schemas.public import ShareTripOut
+from app.services.budget_service import calculate_trip_budget
 from app.core.dependencies import get_current_user
 
 router = APIRouter()
@@ -94,3 +99,88 @@ def delete_trip(
     db.delete(trip)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{trip_id}/expenses", response_model=List[ExpenseOut], status_code=status.HTTP_200_OK)
+def get_expenses(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == current_user.id).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found",
+        )
+    expenses = db.query(Expense).filter(Expense.trip_id == trip.id).all()
+    return expenses
+
+
+@router.post("/{trip_id}/expenses", response_model=ExpenseOut, status_code=status.HTTP_201_CREATED)
+def create_expense(
+    trip_id: int,
+    data: ExpenseCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == current_user.id).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found",
+        )
+
+    expense = Expense(
+        trip_id=trip.id,
+        amount=data.amount,
+        category=data.category,
+        description=data.description,
+    )
+    db.add(expense)
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+@router.get("/{trip_id}/budget", response_model=BudgetSummaryOut, status_code=status.HTTP_200_OK)
+def get_budget(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == current_user.id).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found",
+        )
+
+    return calculate_trip_budget(db, trip.id)
+
+
+@router.post("/{trip_id}/share", response_model=ShareTripOut, status_code=status.HTTP_200_OK)
+def share_trip(
+    trip_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == current_user.id).first()
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found",
+        )
+
+    if not trip.share_token:
+        trip.share_token = secrets.token_urlsafe(16)
+    trip.is_public = True
+
+    db.commit()
+    db.refresh(trip)
+
+    return ShareTripOut(
+        share_token=trip.share_token,
+        share_url=f"/public/trips/{trip.share_token}",
+        is_public=trip.is_public,
+    )
